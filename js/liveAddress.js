@@ -51,6 +51,16 @@ function wireUpLiveAddress(inputId, apiKey){
 				
 				//Grab the site service day while we're at it
 				wastemate.getServiceDayOfWeek().then(function(serviceDays){
+					
+					if(serviceDays.length === 0){
+						alert("Oh drats, we don't have your address configured for online sign up. Call our office to speak to a human. 238-2381");
+						wma_viewModel.address("");
+						wma_viewModel.serviceAddress("");
+		      			wma_viewModel.serviceCityStateZip("");
+		      			wma_viewModel.serviceZip("");
+					  	return;
+					}
+					
 					//service days should be an array 
 					var service = serviceDays[0];
 					wma_viewModel.serviceDay(service.dow);
@@ -58,6 +68,12 @@ function wireUpLiveAddress(inputId, apiKey){
 				}, function(err){
 					console.log("Error loading service day!");
 					console.log(err);
+					
+					alert("Oh drats, we don't have your address configured for online sign up. Call our office to speak to a human. 238-2381");
+					wma_viewModel.address("");
+					wma_viewModel.serviceAddress("");
+	      			wma_viewModel.serviceCityStateZip("");
+	      			wma_viewModel.serviceZip("");
 				});
 			});
 			
