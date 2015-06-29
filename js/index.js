@@ -27,11 +27,11 @@ $(document).ready(function(){
       //make search visible!
       wma_viewModel.show('search');
       //After the search is made visible, hookup live address library to the UI input.
-      wireUpLiveAddress('#street_address', '4160067421270775959');
-      
+      wireUpLiveAddress('#street_address', '4160067421127954005');
+
       //Add each of the categories to the UI
       $.each(categories, function(index, category){
-        wma_viewModel.categories.push(category);  
+        wma_viewModel.categories.push(category);
       });
   }, function(err){
     //something must not be right!
