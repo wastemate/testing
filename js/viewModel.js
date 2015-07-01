@@ -329,6 +329,13 @@ function viewModel() {
 				);
 			break;
 			case "payment":
+				
+				if(self.saveOrderInFlight){
+					return;
+				}
+				
+				self.saveOrderInFlight = true;
+				
 				//Step 1 - Tokenize the card info
 				var cardInfo = {
 		          cardNumber: self.billingCard(),
@@ -359,11 +366,13 @@ function viewModel() {
 						//Step 3 - Process the order!
 						wastemate.processNewOrder().then(
 							function(account){
+								self.saveOrderInFlight = false;
 								console.log(account);
 								self.paymentProcessed(true);
 								self.accountNumber(account.C_ID);
 			    				self.show("confirmation");
 							}, function(err){
+								self.saveOrderInFlight = false;
 								console.log(err);
 								if(err.ExceptionMessage){
 									alert(err.ExceptionMessage);
@@ -372,6 +381,7 @@ function viewModel() {
 						);
 					}, function(err){
 						// :(
+						self.saveOrderInFlight = false;
 						console.log(err);
 						if(err.ExceptionMessage){
 							alert(err.ExceptionMessage);
