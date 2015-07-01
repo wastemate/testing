@@ -28,6 +28,7 @@ $(document).ready(function(){
       wma_viewModel.show('search');
       //After the search is made visible, hookup live address library to the UI input.
       wireUpLiveAddress('#street_address', '4160067421127954005');
+
       //Add each of the categories to the UI
       $.each(categories, function(index, category){
         wma_viewModel.categories.push(category);

@@ -401,7 +401,7 @@
         req.onload = function () {
           // This is called even on 404 etc
           // so check the status
-          if (req.status === 201) {
+          if (req.status === 201 || req.status === 200) {
             var encoreAccount = JSON.parse(req.responseText);
             // store the response in cache
             wastemate._private.encoreAccount = encoreAccount;
