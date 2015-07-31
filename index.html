@@ -12,11 +12,16 @@
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
         <link rel="stylesheet" href="assets/css/fonts.css">
         <link rel="stylesheet" href="assets/css/main.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.14.30/css/bootstrap-datetimepicker.css">
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css">
+        <link rel="stylesheet" href="assets/css/refinements.css">
         <!--
         <style>
             #wma-app .wma-info__map-container{display: none;}
         </style>
         -->
+
     </head>
     <body>
         <!--[if lt IE 8]>
@@ -24,177 +29,21 @@
         <![endif]-->
 
         <div id="wma-app" class="wma-container">
-          <!-- initial display BEGIN -->
-          <div class="wma-row wma-inital__header" data-bind="visible: shouldShowSearch">
-                <div class="wma-base__center wma-initial__copy">
-                  <h1 class="wma-heading wma-base__f-light">We'll take your trash away.</h1>
-                  <h4 class="wma-signup-heading">Sign up for Service</h4>
-                  <!-- StreetSmarts JS lib requires form tags -->
-                  <form>
-                    <input class="wma-base__text-input wma-initial__input" type="text" placeholder="Enter Your Address To Begin" id="street_address" name="street_address">
-                  </form>
-                </div>
-            </div>              
-                
-            <div class="wma-row wma-initial__steps" data-bind="visible: shouldShowSearch">
-                <ul>
-                  <li class="wma-initial__step">
-                    <p class="wma-initial__step-count">1</p>
-                    <p class="wma-copy-heavy">Search</p>
-                    <p class="wma-base__f-light">for your address.</p>
-                  </li>
-                  <li class="wma-initial__step">
-                    <p class="wma-initial__step-count">2</p>
-                    <p class="wma-copy-heavy">Choose</p>
-                    <p class="wma-base__f-light">your services.</p>
-                  </li>
-                  <li class="wma-initial__step">
-                    <p class="wma-initial__step-count">3</p>
-                    <p class="wma-copy-heavy">Pay</p>
-                    <p class="wma-base__f-light">to confirm.</p>
-                  </li>
-                </ul>
-            </div>
-          
-          <div class="wma-row wma-initial__services" data-bind="visible: shouldShowSearch, foreach: categories">
-            <div class="wma-initial__service" data-bind="click: $root.loadCategory">
-              <div class="wma-initial__service-img-wrap">
-                <img src="assets/images/bins/can_black.svg" alt="" class="wma-initial__can-black" data-bind="attr: {src: icon, alt: name}">
-              </div>
-              <h3 class="service-title" data-bind="text: name"></h3>
-              <p class="service-description" data-bind="text: description"></p>
-            </div>
-            <!--
-            <div class="wma-initial__service">
-              <div class="wma-initial__service-img-wrap">
-                <img src="assets/images/bins/rolloff_blue.svg" alt="" class="wma-initial__rolloff-blue">
-              </div>
-              <h3 class="service-title">Roll-Off</h3>
-              <p class="service-description">Ideal for construction projects, these extra-large containers are hauled to and from your location and can hold a wide variety of materials.</p>
-            </div>
-            -->        
-          </div>
-          <!-- initial display END -->
-          <!-- process nav BEGIN -->
-          <div class="wma-process__nav" data-bind="visible: shouldShowProcessNav">
-              <div class="wma-process__nav-wrap">
-                 <!--shouldShowConfirmation-->
-                <h3 class="wma-process__nav-confnum" data-bind="visible: shouldShowConfirmation">Order confirmation # <span data-bind="text: accountNumber"></span></h3>
-                <ul>
-                    <!-- todo: class="wma-nav__completed" when the step is done! --> 
-                  <li data-bind="css: {'wma-nav__completed': cartsChoosen(), 'wma-nav__active': !cartsChoosen()}, click: cartsChoosen() ? show('residential'): null">
-                    <div class="wma-process__nav-count">1</div>
-                    <p class="wma-process__nav-desc">Choose Carts</p>
-                  </li>
-                  <li data-bind="css: {'wma-nav__completed': startChoosen(), 'wma-nav__active': !startChoosen()}, click: cartsChoosen() ? show('chooseStart'): null">
-                    <div class="wma-process__nav-count">2</div>
-                    <p class="wma-process__nav-desc">Choose start date</p>
-                  </li>
-                  <li data-bind="css: {'wma-nav__completed': addressConfirmed(), 'wma-nav__active': !addressConfirmed()}, click: startChoosen() ? show('siteInfo'): null">
-                    <div class="wma-process__nav-count">3</div>
-                    <p class="wma-process__nav-desc">Confirm address</p>
-                  </li>
-                  <li data-bind="css: {'wma-nav__completed': paymentProcessed(), 'wma-nav__active': !paymentProcessed()}, click: addressConfirmed() ? show('payment'): null">
-                    <div class="wma-process__nav-count">4</div>
-                    <p class="wma-process__nav-desc">Payment information</p>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          <!-- process nav END -->
-          <!-- choose line of business BEGIN -->
-          <div class="wma-row wma-service__location" data-bind="visible: shouldChooseLob">
-            <div class="wma-base__center-inline wma-service__location-map">
-              <div class="wma-service__location-map-container"></div>
-            </div>
-            <div class="wma-base__center-inline wma-service__location-details">
-              <p class="wma-service__location-heading">Choose service for</p>
-              <form>
-                <input class="wma-base__text-input wma-base__light-border wma-service__location-form" type="text" placeholder="1915 Fieldstone Circle">
-              </form>
-            </div>
-          </div>
-          <div class="wma-row wma-service__type" data-bind="visible: shouldChooseLob, foreach: categories">
-              <div class="wma-base__center-inline wma-service__type-container" data-bind="click: $root.loadCategory">
-                <div class="wma-base__copy-wrap wma-service__type-copy-wrap">
-                  <h2 class="wma-service__type-title" data-bind="text: name"></h2>
-                  <h4 class="wma-service__type-supporting" data-bind="text: description"></h4>
-                </div>
-              </div>
-          </div>
-          <!-- choose line of business END -->          
-          <!-- choose residential services BEGIN -->
-          <div class="wma-products__container" data-bind="visible: shouldShowResidentialServices">
-              <div class="wma-products__product-wrap">
-                <p class="wma-products__title">Choose garbage cart</p>
-                <p class="wma-products__title-note">For all non-recyclable household waste</p>
-                <!--ko foreach: landfillServices -->
-                <div class="wma-product__container" data-bind="click: $root.selectLandfillSerivce, style: {'opacity': (!(typeof selected === 'undefined') && selected) ? '1' : '.7'}">
-                  <div class="wma-product__image-wrap">
-                    <img src="assets/images/ph_cart.png" data-bind="attr: {src: icon}">
-                  </div>
-                  <div class="wma-product__desc-wrap">
-                    <div class="wma-base__light-border  wma-product__desc">
-                      <p class="wma-product__price" data-bind="text: ('$' + price)"></p>
-                      <p class="wma-product__size" data-bind="text: name"></p>
-                    </div>
-                  </div>
-                </div>
-                <!-- /ko -->
-             </div>
-          </div>
-          <div class="wma-products__container" data-bind="visible: shouldShowResidentialServices">
-             <div class="wma-products__product-wrap">
-                <p class="wma-products__title">Choose recycle cart</p>
-                <p class="wma-products__title-note">For any recycleable household waste</p>
-                <!--ko foreach: recyclingServices -->
-                <div class="wma-product__container" data-bind="click: $root.selectRecycleSerivce, style: {'opacity': (!(typeof selected === 'undefined') && selected) ? '1' : '.7'}">
-                  <div class="wma-product__image-wrap">
-                    <img src="assets/images/ph_cart.png" data-bind="attr: {src: icon}">
-                  </div>
-                  <div class="wma-product__desc-wrap">
-                    <div class="wma-base__light-border  wma-product__desc">
-                      <p class="wma-product__price" data-bind="text: (price > 0 ? ('$' + price) : 'Included')"></p>
-                      <p class="wma-product__size" data-bind="text: name"></p>
-                    </div>
-                  </div>
-                </div>
-                <!-- /ko -->
-              </div>
-          </div>
-          <div class="wma-products__container" data-bind="visible: shouldShowResidentialServices">
-             <div class="wma-products__product-wrap">
-                <p class="wma-products__title">Choose yard waste cart</p>
-                <p class="wma-products__title-note">For all household yard waste</p>
-                <!--ko foreach: organicsServices -->
-                <div class="wma-product__container" data-bind="click: $root.selectOrganicsSerivce, style: {'opacity': (!(typeof selected === 'undefined') && selected) ? '1' : '.7'}">
-                  <div class="wma-product__image-wrap">
-                    <img src="assets/images/ph_cart.png" data-bind="attr: {src: icon}">
-                  </div>
-                  <div class="wma-product__desc-wrap">
-                    <div class="wma-base__light-border  wma-product__desc">
-                      <p class="wma-product__price" data-bind="text: (price > 0 ? ('$' + price) : 'Included')"></p>
-                      <p class="wma-product__size" data-bind="text: name"></p>
-                    </div>
-                  </div>
-                </div>
-                <!-- /ko -->
-              </div>
-            </div> 
-          <!-- choose residential services END -->      
+          <div data-bind="visible: shouldShowSearch, template: {name: 'wma-initial-template'}"></div>  
+          <div class="wma-process__nav" data-bind="visible: shouldShowProcessNav, template: {name: 'wma-process-nav-template'}"></div>
+          <div class="wma-row wma-service__location" data-bind="visible: shouldShowCategories, template: {name: 'wma-service-location-template'}"></div>
+          <div class="wma-row wma-service__type" data-bind="visible: shouldShowCategories, template: { name: 'wma-category-picker-template', foreach: categories}"></div>
+          <div data-bind="visible: shouldShowResidentialServices, template: {name: 'wma-products-template'}"></div> 
           <!-- resi confirmation BEGIN -->
           <div class="wma-products__container" data-bind="visible: shouldChooseStart">
               <div class="wma-products__product-wrap">
                 <div class="wma-choose__selector">
-                    <p class="wma-products__title">First Pickup Day</p>
+                    <p class="wma-products__title">Choose start day</p>
                     <p class="wma-products__title-note  wma-base__f-light">Your service day is <span class="wma-base__f-xtrabold" data-bind="text: humanDeliveryDay()"></span></p>
                     
-                    <!-- ui datepicker -->
-                    <input class="wma-choose__selector-date" type="date" placeholder="Select Date" list="deliveryDates" data-bind="value: serviceStartDate">
-                    <datalist id="deliveryDates" data-bind="foreach: avaiableDeliveryDates">
-                      <option data-bind="text: isoString"></option>
-                    </datalist>
-                    <!-- / -->
+                    <div id='first-pickup-date-text'>3/7/15</div>
+                    <div id='first-pickup-datepicker'></div>
+
                 </div>
             
                 <div class="wma-products__container" data-bind="foreach: selectedServices">
@@ -254,8 +103,9 @@
                   </div>
             
                   <div class="wma-form__checkbox">
+                    <input type="checkbox">
                     <label>
-                      <input type="checkbox"> I understand that I will be charged $X per ton over XX tons included in base fare.
+                      I understand that I will be charged $X per ton over XX tons included in base fare.
                     </label>
                   </div>
             
@@ -272,46 +122,66 @@
             
                 <div class="wma-row">
                   <div class="wma-info__column">
+
                     <h3 class="wma-base__title">Customer information</h3>
-                    <div class="wma-base__form-group">
-                      <label for="wma-cst-fn">First name</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-fn" data-bind="value: serviceFirstName">
+
+                    <div class="wma-base__form-group col-md-6" style="width:49%;float:left;margin-top:10px;">
+                      <input placeholder='First name' type="text" class="wma-base__form-control" id="wma-cst-fn" data-bind="value: serviceFirstName">
                     </div>
-                    <div class="wma-base__form-group">
-                      <label for="wma-cst-ln">Last name</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-ln" data-bind="value: serviceLastName">
+
+                    <div class="wma-base__form-group col-md-6" style="width:49%;float:right;margin-top:10px;">
+                      <input placeholder='Last name' type="text" class="wma-base__form-control" id="wma-cst-ln" data-bind="value: serviceLastName">
                     </div>
+
+                    <div class='clearfix'></div>
+
                     <div class="wma-base__form-group">
-                      <label for="wma-cst-em">Email</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-em" data-bind="value: serviceEmail">
+                      <input placeholder='Email' type="text" class="wma-base__form-control" id="wma-cst-em" data-bind="value: serviceEmail">
                     </div>
+
                     <div class="wma-base__form-group">
-                      <label for="wma-cst-phn">Phone number</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-phn" data-bind="value: servicePhone">
+                      <input placeholder='Phone number (optional)' type="text" class="wma-base__form-control" id="wma-cst-phn" data-bind="value: servicePhone" placeholder='(   )    -    '>
                     </div>
+
                   </div>
-                  
             
                   <div class="wma-info__column">
                     <h3 class="wma-base__title">Customer pick-up address</h3>
-                    <div class="wma-base__form-group">
-                      <label for="wma-cst-adr">Address</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-adr" data-bind="value: serviceAddress">
+
+                    <div class="wma-base__form-group col-md-6" style="width:49%;float:left;margin-top:10px;">
+                      <input placeholder='Address' type="text" class="wma-base__form-control" id="wma-cst-aptste" data-bind="value: serviceAddress">
                     </div>
-                    <div class="wma-base__form-group">
-                      <label for="wma-cst-aptste">Apt/Suite</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-aptste" data-bind="value: serviceAddressApt">
+
+                    <div class="wma-base__form-group col-md-6" style="width:49%;float:right;margin-top:10px;">
+                      <input placeholder='Apt, suite, etc. (optional)' type="text" class="wma-base__form-control" id="wma-cst-aptste" data-bind="value: serviceAddressApt">
                     </div>
+
+                    <div class="clearfix"></div>
+
                     <div class="wma-base__form-group">
-                      <label for="wma-cst-zip">ZIP</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-zip" data-bind="value: serviceZip">
+                      <input placeholder='City' type="text" class="wma-base__form-control" id="wma-cst-city" data-bind="value: serviceCity">
                     </div>
+
+                    <div class="clearfix"></div>
+
+                    <div class="wma-base__form-group col-md-6" style="width:49%;float:left;margin-top:10px;">
+                      <input placeholder='State' type="text" class="wma-base__form-control" id="wma-cst-aptste" data-bind="value: serviceStateShort">
+                    </div>
+
+                    <div class="wma-base__form-group col-md-6" style="width:49%;float:right;margin-top:10px;">
+                      <input placeholder='Zip' type="text" class="wma-base__form-control" id="wma-cst-zip" data-bind="value: serviceZip">
+                    </div>
+
                   </div>
             
             
                   <div class="wma-info__column">
                     <div class="wma-info__map-container">
-                      <!-- map here 100/100 absolute-->
+
+                      <span>Drag the map to adjust your location:</span>
+                      <div id="interactive_map"></div>
+                      <!-- <img data-bind="attr:{ src: serviceMapUrl }"/> -->
+
                     </div>
                   </div>
                 </div>
@@ -323,18 +193,25 @@
             </div>
           <!-- customer info END -->
           <!-- confirm and pay info BEGIN -->
-          <div class="wma-base__container wma-base__padded wma-base__panel-light" data-bind="visible: shouldShowPaymentInfo">
+          <form autocomplete='on' class="wma-base__container wma-base__padded wma-base__panel-light" data-bind="visible: shouldShowPaymentInfo">
               <div class="wma-base__container-wrap">
                 <div class="wma-row">
                   <div class="wma-info__column">
-                    <h3 class="wma-base__title">Payment</h3>
+                    <h3 class="wma-base__title">
+                      Payment
+                      <img id='wma-cc-discover' class='img-responsive' src="assets/images/cc/discover.png">
+                      <img id='wma-cc-amex' class='img-responsive' src="assets/images/cc/amex.png">
+                      <img id='wma-cc-mastercard' class='img-responsive' src="assets/images/cc/mastercard.png">
+                      <img id='wma-cc-visa' class='img-responsive' src="assets/images/cc/visa.png">
+                    </h3>
                     <div class="wma-base__form-group">
-                      <label for="wma-cst-crdnbr">Card Number</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-crdnbr" data-bind="value: billingCard">
+                      <input type="text" placeholder='Card number' class="wma-base__form-control" id="wma-cst-crdnbr" data-bind="value: billingCard">
+                      <span class='glyphicon glyphicon-lock'></span>
                     </div>
                     <div class="wma-base__form-group">
-                      <label for="wma-cst-expdate">Expires on</label>
+                      <label for="wma-cst-expdate">Expires on *</label>
                       <select type="text" class="wma-base__form-control" id="wma-cst-expmm" data-bind="value: billingCardExpiresMonth">
+                        <option value="-1">mm</option>
                         <option value="1">01</option>
                         <option value="2">02</option>
                         <option value="3">03</option>
@@ -349,6 +226,7 @@
                         <option value="12">12</option>
                       </select>
                       <select type="text" class="wma-base__form-control" id="wma-cst-expyy" data-bind="value: billingCardExpiresYear">
+                        <option value="-1">yyyy</option>
                         <option value="2015">2015</option>
                         <option value="2016">2016</option>
                         <option value="2017">2017</option>
@@ -358,44 +236,70 @@
                       </select>
                     </div>
                     <div class="wma-base__form-group">
-                      <label for="wma-cst-cvv">Security code</label>
+                      <label for="wma-cst-cvv">Security code *</label>
                       <input type="text" class="wma-base__form-control" id="wma-cst-cvv" data-bind="value: billingCardSecurity">
+                      <span id='wma-cst-cvv-info'>?</span>
                     </div>
                   </div>
                   
                   <div class="wma-info__column">
                     <h3 class="wma-base__title">Billing information</h3>
+
+                    <div class="clearfix"></div>
+                    
                     <div class="wma-base__form-group">
-                      <label for="wma-cst-billfn">First name</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-billfn" data-bind="value: billingFirstName">
-                    </div>
-                    <div class="wma-base__form-group">
-                      <label for="wma-cst-billln">Last name</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-billln" data-bind="value: billingLastName">
-                    </div>
-                    <div class="wma-form__checkbox">
-                      <label for="wma-cst-billsameaddr"><input type="checkbox" id="wma-cst-billsameaddr" data-bind="click: billingIsSame">Billing address same as service address</label>
+                      <input type="text" placeholder='First name' class="wma-base__form-control" id="wma-cst-billfn" data-bind="value: billingFirstName">
                     </div>
                     <div class="wma-base__form-group">
-                      <label for="wma-cst-billaddr">Address</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-billaddr" data-bind="value: billingAddress">
+                      <input type="text" placeholder='Last name' class="wma-base__form-control" id="wma-cst-billln" data-bind="value: billingLastName">
                     </div>
+
+                    <div>
+                      <input id="wma-cst-billsameaddr" type='checkbox' class='btn btn-xs btn-default'>
+                      <label for="wma-cst-billsameaddr">Billing address same as service address</label>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                    <div class="wma-base__form-group col-md-6 wma-billing-input" style="width:49%;float:left;margin-top:10px;">
+                      <input placeholder='Address' type="text" class="wma-base__form-control" data-bind="value: billingAddress">
+                    </div>
+
+                    <div class="wma-base__form-group col-md-6 wma-billing-input" style="width:49%;float:right;margin-top:10px;">
+                      <input placeholder='Apt, suite, etc. (optional)' type="text" class="wma-base__form-control" data-bind="value: billingAddressApt">
+                    </div>
+
+                    <div class="clearfix"></div>
+
                     <div class="wma-base__form-group">
-                      <label for="wma-cst-billste">Apt / Suite</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-billste" data-bind="value: billingAddressApt">
+                      <input placeholder='City' type="text" class="wma-base__form-control wma-billing-input" data-bind="value: billingCity">
                     </div>
-                    <div class="wma-base__form-group">
-                      <label for="wma-cst-billzip">ZIP</label>
-                      <input type="text" class="wma-base__form-control" id="wma-cst-billzip" data-bind="value: billingZip">
+
+                    <div class="clearfix"></div>
+
+                    <div class="wma-base__form-group col-md-6 wma-billing-input" style="width:49%;float:left;margin-top:10px;">
+                      <input placeholder='State' type="text" class="wma-base__form-control" data-bind="value: billingStateShort">
                     </div>
+
+                    <div class="wma-base__form-group col-md-6 wma-billing-input" style="width:49%;float:right;margin-top:10px;">
+                      <input placeholder='Zip' type="text" class="wma-base__form-control" data-bind="value: billingZip">
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                    <div class="wma-base__form-group col-md-6 wma-billing-input" style="margin-top:10px;">
+                      <input placeholder='Phone number (optional)' type="text" class="wma-base__form-control" id='wma-cst-billingphn' data-bind="value: billingPhone">
+                    </div>
+
                   </div>
                   
                   <div class="wma-info__column">
                     <div class="wma-billing__summary">
                       <address>
                         <p data-bind="text: serviceAddress"></p>
-                        <p data-bind="text: serviceCityStateZip"></p>
-                        <p data-bind="click: show('siteInfo')">Change address</p>
+                        <p data-bind="text: serviceAddressAptPrint"></p>
+                        <p data-bind="text: serviceAddressCityStateZip"></p>
+                        <p id='wma-btn-change-address' data-bind="click: show('siteInfo')">Change address</p>
                       </address>
             
                       <!-- service detail -->
@@ -408,24 +312,31 @@
                           </tr>
                         </table>
                       </div>
+
                       <!-- / service detail -->
                       <div class="wma-billing__total">
+
                         <table>
                           <tr>
                             <td>Total due</td>
-                            <td data-bind="text: selectedServicePrice"></td>
+                            <td data-bind="text: orderTotal"></td>
                           </tr>
                           <tr>
                             <td>Total recurring monthly</td>
-                            <td data-bind="text: selectedServicePrice"></td>
+                            <td data-bind="text: recurringTotal"></td>
                           </tr>
                         </table>
             
                         <div class="wma-form__checkbox">
-                          <label for="wma-cst-billterms"><input type="checkbox" id="wma-cst-billterms">Enroll in Autopay</label>
+                          <input type="checkbox" id="wma-cst-billterms-autopay" data-bind="checked: wantsAutopay">
+                          <label for="wma-cst-billterms-autopay"><em>Yes, </em>please enroll me in auto-pay. I understand that my credit card will be charged monthly for recurring trash service.</label>
                         </div>
+
+                        <div class="clearfix"></div>
+
                         <div class="wma-form__checkbox">
-                          <label for="wma-cst-billterms"><input type="checkbox" id="wma-cst-billterms">Enroll in Paperless Billing</label>
+                          <input type="checkbox" id="wma-cst-billterms-paperless" data-bind="checked: wantsPaperless">
+                          <label for="wma-cst-billterms-paperless"><em>Yes, </em> please enroll me in paperless billing.</label>
                         </div>
                         
                         <button class="wma-base__next-btn wma-billing__place-order" data-bind="click: $root.next">Place Order</button>
@@ -437,7 +348,7 @@
                   
                 </div>
               </div>
-            </div>
+            </form>
           <!-- confirm and pay info END -->
           
           <!-- confirmation BEGIN -->
@@ -461,17 +372,175 @@
           
           <!-- Order confirmation END -->
         </div> 
+        
+        <script type="text/html" id="wma-initial-template">
+            <div class="wma-row wma-inital__header"    data-bind="template: {name: 'wma-inital_header-template'}"></div>              
+            <div class="wma-row wma-initial__steps"    data-bind="template: {name: 'wma-initial_steps-template'}"></div>
+            <div class="wma-row wma-initial__services" data-bind="template: {name: 'wma-category-template', foreach: categories}"></div>
+        </script>
 
-        <!--<script src="http://localhost:35729/livereload.js"></script>-->
-        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <script type="text/html" id="wma-category-template">
+            <div class="wma-initial__service" data-bind="click: $root.loadCategory">
+                <div class="wma-initial__service-img-wrap">
+                    <img src="assets/images/bins/can_black.svg" alt="" class="wma-initial__can-black" data-bind="attr: {src: icon, alt: name}">
+                </div>
+                <h3 class="service-title" data-bind="text: name"></h3>
+                <p class="service-description" data-bind="text: description"></p>
+            </div>
+        </script>
+
+        <script type="text/html" id="wma-category-picker-template">
+            <div class="wma-base__center-inline wma-service__type-container" data-bind="click: $root.loadCategory">
+                <div class="wma-base__copy-wrap wma-service__type-copy-wrap">
+                  <h2 class="wma-service__type-title" data-bind="text: name"></h2>
+                  <h4 class="wma-service__type-supporting" data-bind="text: description"></h4>
+                </div>
+            </div>
+        </script>
+
+        <script type="text/html" id="wma-inital_header-template">
+            <div class="wma-base__center wma-initial__copy">
+              <h1 class="wma-heading wma-base__f-light">We&#39;ll take your trash away.</h1>
+              <h4 class="wma-signup-heading">Sign up for Service</h4>
+
+              <form id='form_street_address'>
+                <input class="wma-base__text-input wma-initial__input" placeholder="Enter Your Address To Begin" id="street_address" name="street_address">
+              </form>
+
+            </div>
+        </script>
+
+        <script type="text/html" id="wma-initial_steps-template">
+            <ul>
+              <li class="wma-initial__step">
+                <p class="wma-initial__step-count">1</p>
+                <p class="wma-copy-heavy">Search</p>
+                <p class="wma-base__f-light">for your address.</p>
+              </li>
+              <li class="wma-initial__step">
+                <p class="wma-initial__step-count">2</p>
+                <p class="wma-copy-heavy">Choose</p>
+                <p class="wma-base__f-light">your services.</p>
+              </li>
+              <li class="wma-initial__step">
+                <p class="wma-initial__step-count">3</p>
+                <p class="wma-copy-heavy">Pay</p>
+                <p class="wma-base__f-light">to confirm.</p>
+              </li>
+            </ul>
+        </script>
+
+        
+        <script type="text/html" id="wma-process-nav-template">
+            <div class="wma-process__nav-wrap">
+                 <!--shouldShowConfirmation-->
+                <h3 class="wma-process__nav-confnum" data-bind="visible: shouldShowConfirmation">Order confirmation # <span data-bind="text: accountNumber"></span></h3>
+                <ul>
+                    <!-- todo: class="wma-nav__completed" when the step is done! --> 
+                  <li data-bind="css: {'wma-nav__completed': cartsChoosen(), 'wma-nav__active': !cartsChoosen()}, click: cartsChoosen() ? show('residential'): null">
+                    <div class="wma-process__nav-count">1</div>
+                    <p class="wma-process__nav-desc">Choose Carts</p>
+                  </li>
+                  <li data-bind="css: {'wma-nav__completed': startChoosen(), 'wma-nav__active': !startChoosen()}, click: cartsChoosen() ? show('chooseStart'): null">
+                    <div class="wma-process__nav-count">2</div>
+                    <p class="wma-process__nav-desc">Choose start date</p>
+                  </li>
+                  <li data-bind="css: {'wma-nav__completed': addressConfirmed(), 'wma-nav__active': !addressConfirmed()}, click: startChoosen() ? show('siteInfo'): null">
+                    <div class="wma-process__nav-count">3</div>
+                    <p class="wma-process__nav-desc">Confirm address</p>
+                  </li>
+                  <li data-bind="css: {'wma-nav__completed': paymentProcessed(), 'wma-nav__active': !paymentProcessed()}, click: addressConfirmed() ? show('payment'): null">
+                    <div class="wma-process__nav-count">4</div>
+                    <p class="wma-process__nav-desc">Payment information</p>
+                  </li>
+                </ul>
+            </div>
+        </script>
+
+        <script type="text/html" id="wma-service-location-template">
+            <div class="wma-base__center-inline wma-service__location-map">
+              <div class="wma-service__location-map-container" data-bind="style: { backgroundImage: 'url(\'' +  serviceMapUrl() + '\')' }" ></div>
+            </div>
+            <div class="wma-base__center-inline wma-service__location-details">
+              <p class="wma-service__location-heading">Choose service for</p>
+              <form>
+                <input id="lob_address" class="wma-base__text-input wma-base__light-border wma-service__location-form" type="text" data-bind="value: serviceAddress() + ', ' + serviceCity() + ' ' + serviceStateShort()">
+              </form>
+            </div>
+        </script>
+
+        <script type="text/html" id="wma-products-template">
+            <div class="wma-products__container" data-bind="template: {name: 'wma-products-landfill-template'}"></div>
+            <div class="wma-products__container" data-bind="template: {name: 'wma-products-recycle-template'}"></div>
+            <div class="wma-products__container" data-bind="template: {name: 'wma-products-organics-template'}"></div>
+        </script>
+
+        <script type="text/html" id="wma-products-landfill-template">
+            <div class="wma-products__product-wrap">
+                <p class="wma-products__title">Choose garbage cart</p>
+                <p class="wma-products__title-note">For all non-recyclable household waste</p>
+                <div data-bind="template: {name: 'wma-product-template', foreach: landfillServices }"></div>
+            </div>
+        </script>
+
+        <script type="text/html" id="wma-products-recycle-template">
+            <div class="wma-products__product-wrap">
+                <p class="wma-products__title">Choose recycle cart</p>
+                <p class="wma-products__title-note">For any recycleable household waste</p>
+                <div data-bind="template: {name: 'wma-product-template', foreach: recyclingServices }"></div>
+            </div>
+        </script>
+
+        <script type="text/html" id="wma-products-organics-template">
+            <div class="wma-products__product-wrap">
+                <p class="wma-products__title">Choose yard waste cart</p>
+                <p class="wma-products__title-note">For all household yard waste</p>
+                <div data-bind="template: {name: 'wma-product-template', foreach: organicsServices }"></div>
+            </div>
+        </script>
+
+        <script type="text/html" id="wma-product-template">
+            <div class="wma-product__container" data-bind="click: $root.selectProductService, style: {'opacity': (!(typeof selected === 'undefined') && selected) ? '1' : '.7'}">
+              <div class="wma-product__image-wrap">
+                <img src="assets/images/ph_cart.png" data-bind="attr: {src: icon}">
+              </div>
+              <div class="wma-product__desc-wrap">
+                <div class="wma-base__light-border  wma-product__desc">
+                  <p class="wma-product__price" data-bind="text: (price > 0 ? ('$' + price) : 'Included')"></p>
+                  <p class="wma-product__size" data-bind="text: name"></p>
+                </div>
+              </div>
+            </div>
+        </script>
+
+        <script type="text/html" id="tbt3">
+        </script>
+        <script type="text/html" id="tbt3">
+        </script>
+        <script type="text/html" id="tbt3">
+        </script>
+        <script type="text/html" id="tbt3">
+        </script>
+
+        <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.0/lodash.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.payment/1.2.4/jquery.payment.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.1.62/jquery.inputmask.bundle.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.14.30/js/bootstrap-datetimepicker.min.js"></script>
         <script src="https://www.promisejs.org/polyfills/promise-6.1.0.min.js"></script>
         <script src="//www.parsecdn.com/js/parse-1.4.2.min.js"></script>
-        <script type="text/javascript" src="wastemate.js"></script>
-        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
-        <script type="text/javascript" src="js/lib/jquery.liveaddress.js"></script>
-        <script type="text/javascript" src="js/liveAddress.js"></script>
-        <script type="text/javascript" src="js/viewModel.js"></script>
-        <script type="text/javascript" src="js/index.js"></script>  
+        <script src="wastemate.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyDkNkOrlhv8qDAznL8boO3lMXBQUAopnt0"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+        <script src="js/input-placeholder-label.js"></script>
+        <script src="js/viewModel.js"></script>
+        <script src="js/index.js"></script>  
+        <script src="js/liveAddressGoogle.js"></script>
+        <script src="js/miniMap.js"></script>
+        <script src="http://localhost:35729/livereload.js"></script>
+
     </body>
 </html>

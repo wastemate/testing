@@ -38,6 +38,9 @@
       getServices: function (line, address) {
         return wastemate._private.host + 'services/' + wastemate._private.organizationToken + '/' + line + '?lat=' + address.lat + '&lon=' + address.lon;
       },
+      updateLocation: function() {
+        return wastemate._private.host + 'services/validate/' + wastemate._private.organizationToken;
+      },
       getServiceDay: function (address) {
         return wastemate._private.host + 'services/dow/' + wastemate._private.organizationToken + '?lat=' + address.lat + '&lon=' + address.lon;
       },
@@ -90,6 +93,57 @@
           return services;
         }
       }
+    },
+    /**
+     * Set the new lat/lon for the account based on user overriding location on the map
+     */
+    updateAddressLocation: function(lat, lon){
+      return new Promise(function(resolve, reject){
+
+        var updateAddress = {
+          oldLocation: {
+            lat: wastemate._private.account.get('lat'),
+            lon: wastemate._private.account.get('lon')
+          },
+          newLocation: {
+            lat: lat,
+            lon: lon
+          }
+        };
+
+        // Do the usual XHR stuff
+        var req = new XMLHttpRequest();
+        req.open('POST', wastemate._config.updateLocation());
+        req.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+        req.onload = function () {
+          // This is called even on 404 etc
+          // so check the status
+          if (req.status === 200) {
+
+            var response = JSON.parse(req.responseText);
+
+            if(!response.samePricing || !response.sameRouting){
+              //new location results in changed prices and/or routes.
+              reject(response);
+            } else {
+              wastemate._private.account.set('lat', lat);
+              wastemate._private.account.set('lon', lon);
+              wastemate._private.account.save();
+              resolve(response);
+            }
+          } else {
+            // Otherwise reject with the status text
+            // which will hopefully be a meaningful error
+            reject(new Error(req.errorMessage));
+          }
+        };
+        // Handle network errors
+        req.onerror = function () {
+          reject(new Error('Network Error'));
+        };
+        // Make the request
+        req.send(JSON.stringify(updateAddress));
+      });
     },
     /**
      * Load the service categories (Residential, Commercial, Rolloff, etc.)
@@ -209,7 +263,7 @@
       });
     },
     /**
-     * The call to WasteMate's credit card tokenizer service 
+     * The call to WasteMate's credit card tokenizer service
      */
     tokenizeCard: function (cardInfo) {
       return new Promise(function (resolve, reject) {
@@ -237,11 +291,17 @@
           // This is called even on 404 etc
           // so check the status
           if (req.status === 200) {
-            var cardToken = JSON.parse(req.responseText);
+            var response = JSON.parse(req.responseText);
+
+            if(response.isError){
+              reject(new Error(response.message));
+              return;
+            }
+
             // store the response in cache
-            wastemate._private.cardToken = cardToken;
+            wastemate._private.cardToken = response.token;
             // Resolve the promise with the card token object
-            resolve(cardToken);  /* response object
+            resolve(response.token);  /* response object
               {
                 creditCardToken: 'theToken', //safe to store in Parse :)
                 lastFour: '4444'
@@ -299,6 +359,9 @@
         email: serviceSite.email || '',
         phone: serviceSite.phone || '',
         address: serviceSite.address || '',
+        street: serviceSite.street || '',
+        city: serviceSite.city || '',
+        state: serviceSite.state || '',
         suite: serviceSite.suite || '',
         zip: serviceSite.zip || ''
       };
@@ -314,6 +377,7 @@
         });
       });
     },
+    
     /**
      * Set the order start date
      */
@@ -346,7 +410,7 @@
       });
     },
     /**
-     * Persiste the customer's billing info to a Parse object 
+     * Persiste the customer's billing info to a Parse object
      */
     saveBillingSelection: function (billing) {
       var billingObject = {
@@ -431,6 +495,7 @@
      */
     createTempAccount: function (address) {
       var isMultiple = false;
+      /*
       if (wastemate._private.account && !wastemate._private.account.street.equals(address.street)) {
         /* TODO/NOTE:
           * This person has already searched for another address.
@@ -438,14 +503,14 @@
           * Eventually we need to come up with a way to prompt them from a valid phone number (confirm with twillio verification code process)
           * after they've searched for more than 5 addresses on the hauler's site (to prevent competitors from figuring out their pricing logic/teritories).
           * To do that completely, we'd need cookies or some other "browser fingerprint" type of method
-         */
+
         isMultiple = true;
       } else if (wastemate._private.account && wastemate._private.account.street.equals(address.street)) {
         return new Promise(function (resolve) {
           //When the address is already the same as what they've searched for in the past, kick that same object back out!
           resolve(wastemate._private.account);
         });
-      }
+      }*/
       var addressObj = {
         primaryNumber: address.primaryNumber || 0,
         street: address.street || '',
@@ -473,7 +538,7 @@
       });
     },
     /**
-     * The initialization method. Sets keys and pulls in the categories (thus verifying all is well). 
+     * The initialization method. Sets keys and pulls in the categories (thus verifying all is well).
      */
     initialize: function (applicationId, javascriptKey) {
       return new Promise(function (resolve, reject) {

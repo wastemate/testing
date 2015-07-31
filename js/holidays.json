@@ -1,0 +1,72 @@
+[{
+  holiday: "Labor Day",
+  date: "September 7, 2015"
+},
+{
+  holiday: "Columbus Day",
+  date: "October 12, 2015"
+},
+{
+  holiday: "Veterans Day",
+  date: "November 11, 2015"
+},
+{
+  holiday: "Thanksgiving Day",
+  date: "November 26, 2015"
+},
+{
+  holiday: "Friday after Thanksgiving",
+  date: "November 27, 2015"
+},
+{
+  holiday: "Christmas Day",
+  date: "December 25, 2015"
+},
+{
+  holiday: "New Year's Day",
+  date: "January 1, 2016"
+},
+{
+  holiday: "Martin Luther King, Jr. Day",
+  date: "January 18, 2016"
+},
+{
+  holiday: "Presidents Day", 
+  date: "February 15, 2016"
+},
+{
+  holiday: "Easter",
+  date: "March 27, 2016"
+},
+{
+  holiday: "Memorial Day",  
+  date: "May 30, 2016"
+},
+{
+  holiday: "Independence Day",  
+  date: "July 4, 2016"
+},
+{
+  holiday: "Labor Day",
+  date: "September 5, 2016"
+},
+{
+  holiday: "Columbus Day",  
+  date: "October 10, 2016"
+},
+{
+  holiday: "Veterans Day", 
+  date: "November 11, 2016"
+},
+{
+  holiday: "Thanksgiving Day",  
+  date: "November 24, 2016"
+},
+{
+  holiday: "Friday after Thanksgiving", 
+  date: "November 25, 2016"
+},
+{
+  holiday: "Christmas Day",  
+  date: "December 26, 2016"
+}]
