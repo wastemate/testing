@@ -155,7 +155,7 @@
                     <div class="wma-base__form-group col-md-6" style="width:49%;float:right;margin-top:10px;">
                       <input placeholder='Apt, suite, etc. (optional)' type="text" class="wma-base__form-control" id="wma-cst-aptste" data-bind="value: serviceAddressApt">
                     </div>
-
+                    
                     <div class="clearfix"></div>
 
                     <div class="wma-base__form-group">
@@ -164,11 +164,11 @@
 
                     <div class="clearfix"></div>
 
-                    <div class="wma-base__form-group col-md-6" style="width:49%;float:left;margin-top:10px;">
+                    <div class="wma-base__form-group col-md-6" style="width:49%;float:left;">
                       <input placeholder='State' type="text" class="wma-base__form-control" id="wma-cst-aptste" data-bind="value: serviceStateShort">
                     </div>
 
-                    <div class="wma-base__form-group col-md-6" style="width:49%;float:right;margin-top:10px;">
+                    <div class="wma-base__form-group col-md-6" style="width:49%;float:right;">
                       <input placeholder='Zip' type="text" class="wma-base__form-control" id="wma-cst-zip" data-bind="value: serviceZip">
                     </div>
 
@@ -403,9 +403,7 @@
               <h1 class="wma-heading wma-base__f-light">We&#39;ll take your trash away.</h1>
               <h4 class="wma-signup-heading">Sign up for Service</h4>
 
-              <form id='form_street_address'>
-                <input class="wma-base__text-input wma-initial__input" placeholder="Enter Your Address To Begin" id="street_address" name="street_address">
-              </form>
+              <input class="wma-base__text-input wma-initial__input" placeholder="Enter Your Address To Begin" id="street_address" name="street_address">
 
             </div>
         </script>
@@ -463,9 +461,7 @@
             </div>
             <div class="wma-base__center-inline wma-service__location-details">
               <p class="wma-service__location-heading">Choose service for</p>
-              <form>
-                <input id="lob_address" class="wma-base__text-input wma-base__light-border wma-service__location-form" type="text" data-bind="value: serviceAddress() + ', ' + serviceCity() + ' ' + serviceStateShort()">
-              </form>
+              <input id="lob_address" class="wma-base__text-input wma-base__light-border wma-service__location-form" type="text" data-bind="value: serviceAddress() + ', ' + serviceCity() + ' ' + serviceStateShort()">
             </div>
         </script>
 

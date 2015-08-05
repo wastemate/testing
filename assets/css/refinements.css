@@ -5,6 +5,14 @@
   clear: both;
 }
 
+#street_address, #lob_address {
+  text-align: center;
+}
+
+#lob_address {
+  padding-bottom: 10px !important;
+}
+
 .wma-nav__completed, .wma-nav__active {
   cursor: pointer;
 }
