@@ -5,6 +5,9 @@
   clear: both;
 }
 
+
+/* -------------------- */
+
 #street_address, #lob_address {
   text-align: center;
 }
@@ -22,6 +25,7 @@
 }
 #wma-app .wma-info__map-container {
   background: none;
+  margin-top: 55px !important;
 }
 #wma-app .wma-info__map-container:after {
   padding-top: 0;
@@ -42,7 +46,7 @@
 
 /* calendar */
 
-#first-pickup-date-text {
+#first-pickup-date-text, #last-pickup-date-text {
   padding: 10px;
   font-size: 17px;
   color: #702e79;
@@ -50,7 +54,7 @@
   border: 1px solid #DDDDDD;
 }
 
-#first-pickup-datepicker th {
+#first-pickup-datepicker th, #last-pickup-datepicker th {
   text-align: center;
 }
 
@@ -114,7 +118,7 @@
 
 .wma-info__map-container > span {
   color: #702e79;
-  font-weight: bold;
+  font-family: 'proxima_novalight';
 }
 
 /* billing */
@@ -176,11 +180,11 @@ label[for=wma-cst-billsameaddr] {
   font-weight: normal !important;
 }
 
-label[for=wma-cst-billterms] {
+label[for*=wma-cst-billterms] {
   font-style: italic;
 }
 
-label[for=wma-cst-billterms] > em {
+label[for*=wma-cst-billterms] > em {
   font-weight: bold;
 }
 
@@ -250,4 +254,22 @@ img.greyscale {
 img.greyscale:hover {
   filter: none;
   -webkit-filter: grayscale(0);
+}
+
+
+/* nav */
+
+.wma-process__nav-count {
+  line-height: 41px !important;
+  font-size: 1.9em !important;
+}
+
+/* ============ */
+
+.wma-total-due {
+  font-size: 20px;
+}
+
+.wma-total-recurring-monthly {
+  color: #702e79;
 }

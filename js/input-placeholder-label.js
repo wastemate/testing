@@ -1,8 +1,12 @@
 
 $( document ).ready( function() {
 
+  var className = 'custom-input-label';
+
   var paddingDefault = '6px 12px';
   var paddingWithLabel = '12px 12px 0px 12px';
+
+  var animationClass = 'slideUp';
 
   var inputHeight = 50;
 
@@ -45,19 +49,21 @@ $( document ).ready( function() {
 
     $( this )
       .css( 'height', inputHeight )
-      .css( 'padding', paddingDefault )
+      .css( 'padding', paddingDefault );
 
     var placeholderText = $( this ).attr( 'placeholder' );
 
     $( '<label/>', {
-      text: placeholderText
+      text: placeholderText,
+      class: className
     } )
       .css( 'font-weight', 'bold' )
       .css( 'color', labelColor )
       .css( 'font-size', labelFontSize )
       .css( 'padding', labelPadding )
       .css( 'position', 'absolute' )
-      .css( 'display', 'none' )
+      .css( 'visibility', 'hidden' )
+      .addClass( animationClass )
       .insertBefore( $( this ) );
 
     $( this ).on( 'keyup', function() {

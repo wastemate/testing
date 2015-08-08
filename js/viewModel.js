@@ -61,10 +61,13 @@ function viewModel() {
 	/* Recurring steps */
 	self.isRecurringOrder = ko.observable(false);
 	self.cartsChoosen = ko.observable(false);
+	self.materialChoosen = ko.observable(false);
 	self.startChoosen = ko.observable(false);
 	self.addressConfirmed = ko.observable(false);
 	self.paymentProcessed = ko.observable(false);
-	
+
+	self.requiresMaterial = ko.observable(false);
+
 	self.address = ko.observable();
 	self.categories = ko.observableArray();
 	self.services = ko.observableArray();
@@ -72,11 +75,17 @@ function viewModel() {
 	self.landfillServices = ko.observableArray();
 	self.recyclingServices = ko.observableArray();
 	self.organicsServices = ko.observableArray();
+	self.rolloffServices = ko.observableArray(); 
+
+	self.material = ko.observableArray();
+	self.selectedMaterial = ko.observable(); 
+
 	
 	self.serviceDay = ko.observable();
 	
 	//service info
 	self.serviceStartDate = ko.observable();
+	self.serviceEndDate = ko.observable();
 	self.serviceFirstName = ko.observable();
 	self.serviceLastName = ko.observable();
 	self.serviceEmail = ko.observable();
@@ -278,6 +287,14 @@ function viewModel() {
 			services.push(organics);	
 		}
 		
+		var rolloff = ko.utils.arrayFirst(self.rolloffServices(), function(item) {
+            return item.selected == true;
+        }); 
+		
+		if(rolloff){
+			services.push(rolloff);	
+		}
+
 		return services;
 	});
 	
@@ -327,7 +344,10 @@ function viewModel() {
 		var organics = ko.utils.arrayFirst(self.organicsServices(), function(item) {
             return item.selected == true;
         }); 
-		
+		var rolloffs = ko.utils.arrayFirst(self.rolloffServices(), function(item) {
+            return item.selected == true;
+        }); 
+
 		if(landfill){
 			price += landfill.price;
 		}
@@ -337,7 +357,10 @@ function viewModel() {
 		if(organics){
 			price += organics.price;
 		}
-		
+		if(rolloffs){
+			price += rolloffs.price;
+		}
+
 		return price;
 	});
 	
@@ -383,6 +406,10 @@ function viewModel() {
 		console.log("Clicked");
 		console.log(data);
 		
+		if ( data.requiresMaterial ) {
+			self.requiresMaterial(true);
+		}
+
 		wastemate.getServices(data.line).then(function(services){
 			
 			//clear out all services currently in the view model arrays
@@ -390,6 +417,7 @@ function viewModel() {
 			self.landfillServices([]);
 			self.recyclingServices([]);
 			self.organicsServices([]);
+			self.rolloffServices([]);
 			
 			$.each(services, function(index, service){
 				//all the services
@@ -406,13 +434,24 @@ function viewModel() {
 				if(service.type.name == "Organics"){
 				  self.organicsServices.push(service);
 				}
+
+				if(service.type.name == "RollOff"){
+				  self.rolloffServices.push(service);
+				}
+
 			});
 			//sort the arrays!
 			self.landfillServices.sort(function(left, right) { return left.name == right.name ? 0  : (left.name < right.name ? -1 : 1); });
 			self.recyclingServices.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1); });
 			self.organicsServices.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1); });
+			self.rolloffServices.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1); });
 			
-			self.show("residential");
+			if ( self.rolloffServices().length ) {
+				self.show("rolloff");
+			} else {
+				self.show("residential");
+			}
+
 		}, function(err){
 			if(err){
 				//most likely we need the users address before they continue.
@@ -431,7 +470,32 @@ function viewModel() {
 		//wastemate.getServices();
 	};
 	
+	self.selectMaterial = function( data, event ) {
+
+		hasMatch = ko.utils.arrayFirst(self.material(), function(item) {
+	    return item == data;
+    });
+
+		if (hasMatch) {
+
+			self.materialChoosen( true );
+
+			ko.utils.arrayForEach(self.material(), function(item) {
+				item.selected = item == data;
+				if ( item.selected ) {
+					self.selectedMaterial( item );
+				}
+				item.summary = " material";
+			});
+
+		}
+
+		self.material.refresh();	
+
+	};
+
 	self.selectProductService = function(data, event){
+
 		var hasMatch = ko.utils.arrayFirst(self.landfillServices(), function(item) {
             return item == data;
         });
@@ -452,13 +516,45 @@ function viewModel() {
 				item.summary = " recycling cart";
 			});
 			self.recyclingServices.refresh();
-		} else {
+		}
+
+		hasMatch = ko.utils.arrayFirst(self.organicsServices(), function(item) {
+            return item == data;
+        });
+		if (hasMatch) {
 			ko.utils.arrayForEach(self.organicsServices(), function(item) {
 				item.selected = item == data;
 				item.summary = " organics cart";
 			});
 			self.organicsServices.refresh();	
 		}
+
+		hasMatch = ko.utils.arrayFirst(self.rolloffServices(), function(item) {
+            return item == data;
+        });
+		if (hasMatch) {
+
+			// reset material
+			_.each( self.material(), function( m ) {
+				m.selected = false;
+			} );
+
+			// reset date
+
+			self.materialChoosen( false );
+
+			ko.utils.arrayForEach(self.rolloffServices(), function(item) {
+				item.selected = item == data;
+				if ( item.selected ) {
+					self.material( item.material );
+				}
+				item.summary = " bin";
+			});
+
+			self.rolloffServices.refresh();
+		}
+
+
 	};
 	
 	self.next = function(data, event) {
@@ -467,6 +563,7 @@ function viewModel() {
 				//store selection in a pending order
 				//save order should really return a promise... but this is a demo!
 				self.saveOrder(event, function( err ) {
+
 					if ( err ) {
 						self.saveOrderInFlight = false;
 						if ( _.isArray( err ) && err.length > 0 ) {
@@ -513,7 +610,11 @@ function viewModel() {
 					} );
 
         	$('#first-pickup-date-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
+        	$('#wma-rolloff-dropoff-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
+        	$('#wma-rolloff-pickup-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
+
         	self.serviceStartDate( moment( self.serviceStartDate() || availableDates[0] ).toDate() );
+        	self.serviceEndDate( moment( self.serviceStartDate() || availableDates[0] ).toDate() );
 
           var dp = $('#first-pickup-datepicker').datetimepicker({
               icons: {
@@ -537,10 +638,56 @@ function viewModel() {
           } );
 
 					self.cartsChoosen(true);
-					//query backend for service day
 					self.show("chooseStart");	
 
 				});
+
+
+			break;
+			case "rolloff":
+
+				var x = self.rolloffServices();
+				var y = self.services();
+				var z = self.material();
+
+				_.each( self.services(), function( s ) {
+
+					_.each( s.material, function( m ) {
+						m.icon = 'http://placehold.it/100x100';
+					} );
+
+					if ( s.selected ) {
+						self.cartsChoosen(true);
+					}
+
+				} );
+
+				if ( !self.cartsChoosen() ) {
+					alert( 'Please select a bin.' );
+					return;
+				}
+
+				self.show("materials");
+
+
+			break;
+			case "materials":
+
+				if ( !self.materialChoosen() ) {
+					alert( 'Please choose a material.' );
+					return;
+				}
+
+				self.saveOrder( event, function( err ) {
+
+					if ( err ) {
+						console.log( 'Could not save order.' )
+						return;
+					}
+
+					self.show("deliveryAndReview");	
+
+				} );
 
 
 			break;
@@ -765,20 +912,27 @@ function viewModel() {
             return item.selected == true;
         });
 
+		var rolloffService = ko.utils.arrayFirst(self.rolloffServices(), function(item) {
+            return item.selected == true;
+        });
+
+
 		var err = [];
 		
-		//TODO: These labels don't match the UI labels. Could be confusing for user.
-
-		if(!landfillService){
+		if( self.landfillServices().length && !landfillService ){
 			err.push("a landfill cart");
 		}
 		
-		if(!recycleService){
+		if( self.recyclingServices().length && !recycleService ){
 			err.push("a recycling cart");
 		}
 		
-		if(!organicsService){
+		if( self.organicsServices().length && !organicsService ){
 			err.push("an organics cart");
+		}
+
+		if( self.rolloffServices().length && !rolloffService ){
+			err.push("a rolloff bin");
 		}
 
 		if ( err.length > 0 ) {
@@ -790,19 +944,25 @@ function viewModel() {
 		serviceChoices.push(landfillService);
 		serviceChoices.push(recycleService);
 		serviceChoices.push(organicsService);
+		serviceChoices.push(rolloffService);
 		
-		console.log(serviceChoices);
+		console.log( serviceChoices, self.selectedMaterial() );
 		
-		wastemate.saveServiceSelection(serviceChoices).then(function(){
+		wastemate.saveServiceSelection( serviceChoices, [ self.selectedMaterial() ] ).then(function(){
+
 			console.log("saved service selection");
 			self.saveOrderInFlight = false;
 			next();
+
 		}, function(err){
+
 			console.log("something went wrong");
 			console.log(err);
 			self.saveOrderInFlight = false;
 			next( err );
-		});;
+
+		});
+
 	};
 	
 	self.show = function(view){
@@ -813,8 +973,7 @@ function viewModel() {
 			self.makeBillingSame();
 		}
 
-		switch(view){
-			case "loading":
+		var hideAll = function() {
 				self.shouldShowSearch(false);
 				self.shouldShowCategories(false);
 				self.shouldShowResidentialServices(false);
@@ -827,165 +986,77 @@ function viewModel() {
 				self.shouldShowProcessNav(false);
 				self.shouldShowProcessNavFooter(false);
 				self.shouldChooseStart(false);
+		};
+
+		switch(view){
+			case "loading":
+				hideAll();
 				self.showing("loading");
 			break;
 			case "search":
+				hideAll();
 				self.shouldShowSearch(true);
-				self.shouldShowCategories(false);
-				self.shouldShowResidentialServices(false);
-				self.shouldShowRollOffMaterials(false);
-				self.shouldShowRollOffServices(false);
-				self.shouldShowDeliveryAndReview(false);
-				self.shouldShowBillingInfo(false);
-				self.shouldShowPaymentInfo(false);
-				self.shouldShowConfirmation(false);
-				self.shouldShowProcessNav(false);
-				self.shouldShowProcessNavFooter(false);
-				self.shouldChooseStart(false);
 				self.showing("search");
 				break;
 			case "categries":
-				self.shouldShowSearch(false);
-				self.shouldShowResidentialServices(false);
-				self.shouldShowRollOffMaterials(false);
-				self.shouldShowRollOffServices(false);
-				self.shouldShowBillingInfo(false);
-				self.shouldShowPaymentInfo(false);
-				self.shouldShowConfirmation(false);
-				self.shouldChooseStart(false);
+				hideAll();
 				self.shouldShowCategories(true);
-				self.shouldShowProcessNav(false);
-				self.shouldShowProcessNavFooter(false);
-				self.shouldShowDeliveryAndReview(false);
 				self.showing("categries");
 				break;
 			case "residential":
-				self.shouldShowSearch(false);
-				self.shouldShowCategories(false);
-				self.shouldShowRollOffMaterials(false);
-				self.shouldShowRollOffServices(false);
-				self.shouldShowDeliveryAndReview(false);
-				self.shouldShowBillingInfo(false);
-				self.shouldShowPaymentInfo(false);
-				self.shouldShowConfirmation(false);
-				self.shouldChooseStart(false);
+				hideAll();
 				self.shouldShowResidentialServices(true);
 				self.shouldShowProcessNav(true);
 				self.shouldShowProcessNavFooter(true);
 				self.showing("residential");
 				break;
 			case "chooseStart":
-				self.shouldShowSearch(false);
-				self.shouldShowCategories(false);
-				self.shouldShowRollOffMaterials(false);
-				self.shouldShowRollOffServices(false);
-				self.shouldShowBillingInfo(false);
-				self.shouldShowPaymentInfo(false);
-				self.shouldShowConfirmation(false);
-				self.shouldShowResidentialServices(false);
-				self.shouldShowDeliveryAndReview(false);
+				hideAll();
 				self.shouldChooseStart(true);
 				self.shouldShowProcessNav(true);
 				self.shouldShowProcessNavFooter(true);
 				self.showing("chooseStart");
 			break;
 			case "deliveryAndReview":
-				self.shouldShowSearch(false);
-				self.shouldShowCategories(false);
-				self.shouldShowRollOffMaterials(false);
-				self.shouldShowRollOffServices(false);
-				self.shouldShowBillingInfo(false);
-				self.shouldShowPaymentInfo(false);
-				self.shouldShowConfirmation(false);
-				self.shouldShowResidentialServices(false);
+				hideAll();
 				self.shouldShowDeliveryAndReview(true);
 				self.shouldShowProcessNav(true);
-				self.shouldShowProcessNavFooter(true);
 				self.showing("deliveryAndReview");
 				break;
 			case "materials":
-				self.shouldShowSearch(false);
-				self.shouldShowCategories(false);
-				self.shouldShowResidentialServices(false);
-				self.shouldShowRollOffServices(false);
-				self.shouldShowDeliveryAndReview(false);
-				self.shouldShowBillingInfo(false);
-				self.shouldShowPaymentInfo(false);
-				self.shouldShowConfirmation(false);
+				hideAll();
 				self.shouldShowRollOffMaterials(true);
 				self.shouldShowProcessNav(true);
 				self.shouldShowProcessNavFooter(true);
 				self.showing("materials");
 				break;
 			case "rolloff":
-				self.shouldShowSearch(false);
-				self.shouldShowCategories(false);
-				self.shouldShowResidentialServices(false);
-				self.shouldShowRollOffMaterials(false);
-				self.shouldShowDeliveryAndReview(false);
-				self.shouldShowBillingInfo(false);
-				self.shouldShowPaymentInfo(false);
-				self.shouldShowConfirmation(false);
+				hideAll();
 				self.shouldShowRollOffServices(true);
 				self.shouldShowProcessNav(true);
 				self.shouldShowProcessNavFooter(true);
 				self.showing("rolloff");
 				break;
 			case "siteInfo":
-				self.shouldShowSearch(false);
-				self.shouldShowCategories(false);
-				self.shouldShowResidentialServices(false);
-				self.shouldShowRollOffMaterials(false);
-				self.shouldShowRollOffServices(false);
-				self.shouldShowDeliveryAndReview(false);
-				self.shouldChooseStart(false);
-				self.shouldShowPaymentInfo(false);
-				self.shouldShowConfirmation(false);
+				hideAll();
 				self.shouldShowBillingInfo(true);
 				self.shouldShowProcessNav(true);
-				self.shouldShowProcessNavFooter(false);
 				self.showing("siteInfo");
 				break;
 			case "payment":
-				self.shouldShowSearch(false);
-				self.shouldShowCategories(false);
-				self.shouldShowResidentialServices(false);
-				self.shouldShowRollOffMaterials(false);
-				self.shouldShowRollOffServices(false);
-				self.shouldShowDeliveryAndReview(false);
-				self.shouldShowBillingInfo(false);
-				self.shouldShowConfirmation(false);
+				hideAll();
 				self.shouldShowPaymentInfo(true);
 				self.shouldShowProcessNav(true);
-				self.shouldShowProcessNavFooter(false);
 				self.showing("payment");
 				break;
 			case "confirmation":
-				self.shouldShowSearch(false);
-				self.shouldShowCategories(false);
-				self.shouldShowResidentialServices(false);
-				self.shouldShowRollOffMaterials(false);
-				self.shouldShowRollOffServices(false);
-				self.shouldShowDeliveryAndReview(false);
-				self.shouldShowBillingInfo(false);
-				self.shouldShowPaymentInfo(false);
+				hideAll();
 				self.shouldShowConfirmation(true);
 				self.shouldShowProcessNav(true);
-				self.shouldShowProcessNavFooter(false);
 				self.showing("confirmation");
 				break;
 			default:
-				self.shouldShowSearch(false);
-				self.shouldShowCategories(false);
-				self.shouldShowResidentialServices(false);
-				self.shouldShowRollOffMaterials(false);
-				self.shouldShowRollOffServices(false);
-				self.shouldShowDeliveryAndReview(false);
-				self.shouldShowBillingInfo(false);
-				self.shouldShowPaymentInfo(false);
-				self.shouldShowConfirmation(false);
-				self.shouldShowProcessNav(false);
-				self.shouldShowProcessNavFooter(false);
+				hideAll();
 				self.showing("");
 		}
 	};
@@ -1154,3 +1225,7 @@ $( '.wma-billing-input' ).on( 'keyup', function() {
 	$( '#wma-cst-billsameaddr' ).removeAttr( 'checked' );
 } );
 
+
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})

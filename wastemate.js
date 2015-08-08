@@ -325,7 +325,7 @@
     /**
      * Save the user's service selection
      */
-    saveServiceSelection: function (services) {
+    saveServiceSelection: function (services, material) {
       //create a new order for this customer @ Parse
       //the services array will have the services that the customer is requesting (multiple for resi - single for rolloff)
       var orderObj = {
@@ -334,6 +334,11 @@
         services: services,
         isOneTime: services.length > 1 ? false : true
       };
+      
+      if(material){
+         orderObj.material = material;
+      }
+      
       return new Promise(function (resolve, reject) {
         var Order = Parse.Object.extend('Order');
         var order = new Order();
@@ -408,7 +413,7 @@
           reject(err);
         });
       });
-    },
+    },    
     /**
      * Persiste the customer's billing info to a Parse object
      */
