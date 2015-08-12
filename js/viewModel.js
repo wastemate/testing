@@ -40,9 +40,9 @@ Date.prototype.toJSONLocal = function () {
 
 function viewModel() {
 	var self = this;
-	
+
 	self.showing = ko.observable("search");
-	
+
 	/* visibility controls */
 	self.shouldShowSearch = ko.observable(false);
 	self.shouldShowCategories = ko.observable(false);
@@ -57,7 +57,7 @@ function viewModel() {
 	self.shouldShowConfirmation = ko.observable(false);
 	self.shouldShowProcessNav = ko.observable(false);
 	self.shouldShowProcessNavFooter = ko.observable(false);
-	
+
 	/* Recurring steps */
 	self.isRecurringOrder = ko.observable(false);
 	self.cartsChoosen = ko.observable(false);
@@ -75,14 +75,14 @@ function viewModel() {
 	self.landfillServices = ko.observableArray();
 	self.recyclingServices = ko.observableArray();
 	self.organicsServices = ko.observableArray();
-	self.rolloffServices = ko.observableArray(); 
+	self.rolloffServices = ko.observableArray();
 
 	self.material = ko.observableArray();
-	self.selectedMaterial = ko.observable(); 
+	self.selectedMaterial = ko.observable();
 
-	
+
 	self.serviceDay = ko.observable();
-	
+
 	//service info
 	self.serviceStartDate = ko.observable();
 	self.serviceEndDate = ko.observable();
@@ -111,11 +111,11 @@ function viewModel() {
 
 	self.userLatLon = ko.observable();
 	self.serviceMapUrl = ko.observable();
-	
+
 	//service cost
 	self.recurringTotal = ko.observable();
 	self.onetimeTotal = ko.observable();
-	
+
 	//billing info
 	self.billingFirstName = ko.observable();
 	self.billingLastName = ko.observable();
@@ -127,7 +127,7 @@ function viewModel() {
 	self.billingStateShort = ko.observable();
 	self.billingZip = ko.observable();
 	self.billingAddressApt = ko.observable();
-	
+
 	self.billingAddressAptPrint = ko.computed( function() {
 		return self.billingAddressApt() ? 'Apt/Suite ' + self.billingAddressApt() : '';
 	} );
@@ -148,14 +148,14 @@ function viewModel() {
 	self.validBillingCard = ko.observable();
 	self.validBillingCardExpiration = ko.observable()
 	self.validBillingCardSecurity = ko.observable();
-	
+
 
 	self.wantsAutopay = ko.observable( true );
 	self.wantsPaperless = ko.observable( true );
-	
+
 	//new account info
 	self.accountNumber = ko.observable('');
-	
+
 
 	self._billingIsSame = ko.observable( false );
 
@@ -186,7 +186,7 @@ function viewModel() {
 		}
 
 	};
-	
+
 	self.ccExpireYearOptions = ko.computed(function(){
 		var years = [];
 
@@ -197,11 +197,11 @@ function viewModel() {
 				value: d.toJSON().substring(0,4)
 			});
 		}
-		
+
 		return years;
 	});
 
-	
+
 	self.avaiableDeliveryDates = ko.computed(function(){
 
 		// criteria: M-F & is not a holiday & is same day as service day
@@ -258,50 +258,50 @@ function viewModel() {
 		// 	isoString: '2015-08-03'
 		// }
 
-		return deliveryDays;	
+		return deliveryDays;
 	});
-	
+
 	self.selectedServices = ko.computed(function(){
 		var services = [];
 		var landfill = ko.utils.arrayFirst(self.landfillServices(), function(item) {
             return item.selected == true;
         });
-		
+
 		if(landfill){
-			services.push(landfill);	
+			services.push(landfill);
 		}
-		
+
 		var recycling = ko.utils.arrayFirst(self.recyclingServices(), function(item) {
             return item.selected == true;
         });
-		
+
 		if(recycling){
-			services.push(recycling);	
+			services.push(recycling);
 		}
-		
+
 		var organics = ko.utils.arrayFirst(self.organicsServices(), function(item) {
             return item.selected == true;
-        }); 
-		
+        });
+
 		if(organics){
-			services.push(organics);	
+			services.push(organics);
 		}
-		
+
 		var rolloff = ko.utils.arrayFirst(self.rolloffServices(), function(item) {
             return item.selected == true;
-        }); 
-		
+        });
+
 		if(rolloff){
-			services.push(rolloff);	
+			services.push(rolloff);
 		}
 
 		return services;
 	});
-	
+
 	self.humanDeliveryDay = ko.computed(function(){
 		var dow = "";
 		var day = self.serviceDay();
-		
+
 		if (Number(day) === day){
 			switch(day){
 				case 0:
@@ -327,12 +327,12 @@ function viewModel() {
 					break;
 				default:
 					dow = "";
-			}	
+			}
 		}
-		
+
 		return dow;
 	});
-	
+
 	self.selectedServicePrice = ko.computed(function(){
 		var price = 0;
 		var landfill = ko.utils.arrayFirst(self.landfillServices(), function(item) {
@@ -343,10 +343,10 @@ function viewModel() {
         });
 		var organics = ko.utils.arrayFirst(self.organicsServices(), function(item) {
             return item.selected == true;
-        }); 
+        });
 		var rolloffs = ko.utils.arrayFirst(self.rolloffServices(), function(item) {
             return item.selected == true;
-        }); 
+        });
 
 		if(landfill){
 			price += landfill.price;
@@ -363,7 +363,7 @@ function viewModel() {
 
 		return price;
 	});
-	
+
 	self.orderTotal = ko.computed(function(){
 		var price = self.selectedServicePrice();
 		if(!self.wantsAutopay()){
@@ -371,7 +371,7 @@ function viewModel() {
 		}
 		return "$" + price;
 	});
-	
+
 	self.recurringTotal = ko.computed(function(){
 		return "$" + self.selectedServicePrice();
 	});
@@ -401,36 +401,36 @@ function viewModel() {
 		});
 
 	});
-	
+
 	self.loadCategory = function(data, event){
 		console.log("Clicked");
 		console.log(data);
-		
+
 		if ( data.requiresMaterial ) {
 			self.requiresMaterial(true);
 		}
 
 		wastemate.getServices(data.line).then(function(services){
-			
+
 			//clear out all services currently in the view model arrays
 			self.services([]);
 			self.landfillServices([]);
 			self.recyclingServices([]);
 			self.organicsServices([]);
 			self.rolloffServices([]);
-			
+
 			$.each(services, function(index, service){
 				//all the services
 				self.services.push(service);
-				
+
 				if(service.type.name == "Landfill"){
 				  self.landfillServices.push(service);
 				}
-				
+
 				if(service.type.name == "Recycling"){
 				  self.recyclingServices.push(service);
 				}
-				
+
 				if(service.type.name == "Organics"){
 				  self.organicsServices.push(service);
 				}
@@ -445,7 +445,7 @@ function viewModel() {
 			self.recyclingServices.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1); });
 			self.organicsServices.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1); });
 			self.rolloffServices.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1); });
-			
+
 			if ( self.rolloffServices().length ) {
 				self.show("rolloff");
 			} else {
@@ -458,18 +458,18 @@ function viewModel() {
 				alert("Address required before choosing service category");
 			}
 		})
-		
+
 	};
-	
+
 	self.showCategories = function(data, event){
 		self.show("categories");
 	};
-	
+
 	self.loadServices = function(data, event){
 		console.log("Address submitted");
 		//wastemate.getServices();
 	};
-	
+
 	self.selectMaterial = function( data, event ) {
 
 		hasMatch = ko.utils.arrayFirst(self.material(), function(item) {
@@ -490,7 +490,7 @@ function viewModel() {
 
 		}
 
-		self.material.refresh();	
+		self.material.refresh();
 
 	};
 
@@ -506,7 +506,7 @@ function viewModel() {
 			});
 			self.landfillServices.refresh();
 		}
-		
+
 		hasMatch = ko.utils.arrayFirst(self.recyclingServices(), function(item) {
             return item == data;
         });
@@ -526,7 +526,7 @@ function viewModel() {
 				item.selected = item == data;
 				item.summary = " organics cart";
 			});
-			self.organicsServices.refresh();	
+			self.organicsServices.refresh();
 		}
 
 		hasMatch = ko.utils.arrayFirst(self.rolloffServices(), function(item) {
@@ -556,7 +556,7 @@ function viewModel() {
 
 
 	};
-	
+
 	self.next = function(data, event) {
 		switch(self.showing()){
 			case "residential":
@@ -573,7 +573,7 @@ function viewModel() {
 								var tmp = '';
 								_.each( err, function( item, index ) {
 									var prefix = ( err.length > 2 && index > 0 ) ? ', ' : '';
-											prefix = ( err.length > 1 && index == err.length-1 ) ? ' and ' : prefix; 
+											prefix = ( err.length > 1 && index == err.length-1 ) ? ' and ' : prefix;
 									tmp += ( prefix + item );
 								} );
 								return tmp;
@@ -638,7 +638,7 @@ function viewModel() {
           } );
 
 					self.cartsChoosen(true);
-					self.show("chooseStart");	
+					self.show("chooseStart");
 
 				});
 
@@ -685,7 +685,7 @@ function viewModel() {
 						return;
 					}
 
-					self.show("deliveryAndReview");	
+					self.show("deliveryAndReview");
 
 				} );
 
@@ -778,7 +778,7 @@ function viewModel() {
 					wastemate.saveServiceInformation(siteInfo).then(
 						function() {
 							self.addressConfirmed(true);
-							self.show("payment");		
+							self.show("payment");
 						}, function (err) {
 							console.log(err);
 							alert("Oops, something went wrong.");
@@ -787,17 +787,17 @@ function viewModel() {
 
 				}, function( err ) {
 					console.log(err);
-					alert("Oops, something went wrong.");					
+					alert("Oops, something went wrong.");
 				} );
 
 
 			break;
 			case "payment":
-				
+
 				if(self.saveOrderInFlight){
 					return;
 				}
-				
+
 		    if ( !self.validBillingCard() ) {
 		    	alert( 'Ooops. Please enter a valid card number.' );
 		    	return;
@@ -828,7 +828,7 @@ function viewModel() {
 		    }
 
 				self.saveOrderInFlight = true;
-				
+
 				//Step 1 - Tokenize the card info
 				var cardInfo = {
 		          cardNumber: self.billingCard().replace(/\s/g,''),
@@ -845,19 +845,19 @@ function viewModel() {
 
 
 							wastemate._private.order.cardToken = cardToken;
-							
+
 							//Step 2 - Persist billing info via fire and forget
 							wastemate._private.order.save();
-							
+
 							//TODO: store the billing information!
 							/*wastemate.saveBillingSelection({
 								name: self.billingFirstName() + '' + self.billingLastName()
 							}).then(function(){
-								
+
 							}, function(err){
-								
+
 							});*/
-							
+
 							//Step 3 - Process the order!
 							wastemate.processNewOrder().then(
 								function(account){
@@ -873,7 +873,7 @@ function viewModel() {
 									if(err){
 										alert( "Oops. There was a problem processing your order." );
 									}
-								}	
+								}
 							);
 
 
@@ -888,7 +888,7 @@ function viewModel() {
 			break;
 		}
 	};
-	
+
 	self.saveOrderInFlight = false;
 	self.saveOrder = function (event, next){
 
@@ -899,15 +899,15 @@ function viewModel() {
 		} else {
 			self.saveOrderInFlight = true;
 		}
-		
+
 		var landfillService = ko.utils.arrayFirst(self.landfillServices(), function(item) {
             return item.selected == true;
         });
-		
+
 		var recycleService = ko.utils.arrayFirst(self.recyclingServices(), function(item) {
             return item.selected == true;
         });
-		
+
 		var organicsService = ko.utils.arrayFirst(self.organicsServices(), function(item) {
             return item.selected == true;
         });
@@ -918,15 +918,15 @@ function viewModel() {
 
 
 		var err = [];
-		
+
 		if( self.landfillServices().length && !landfillService ){
 			err.push("a landfill cart");
 		}
-		
+
 		if( self.recyclingServices().length && !recycleService ){
 			err.push("a recycling cart");
 		}
-		
+
 		if( self.organicsServices().length && !organicsService ){
 			err.push("an organics cart");
 		}
@@ -945,9 +945,9 @@ function viewModel() {
 		serviceChoices.push(recycleService);
 		serviceChoices.push(organicsService);
 		serviceChoices.push(rolloffService);
-		
+
 		console.log( serviceChoices, self.selectedMaterial() );
-		
+
 		wastemate.saveServiceSelection( serviceChoices, [ self.selectedMaterial() ] ).then(function(){
 
 			console.log("saved service selection");
@@ -964,7 +964,7 @@ function viewModel() {
 		});
 
 	};
-	
+
 	self.show = function(view){
 
 		window.invalidateAllInputs();
@@ -1072,21 +1072,28 @@ ko.extenders.required = function(target, errorMessage){
 	//add some sub-observables to our observable
     target.hasError = ko.observable();
     target.validationMessage = ko.observable();
- 
+
     //define a function to do validation
     function validate(newValue) {
        target.hasError(newValue ? false : true);
        target.validationMessage(newValue ? "" : errorMessage || "This field is required");
     }
- 
+
     //initial validation
     validate(target());
- 
+
     //validate whenever the value changes
     target.subscribe(validate);
- 
+
     //return the original observable
     return target;
+};
+
+ko.bindingHandlers.backgroundImage = {
+  update: function(element, valueAccessor) {
+    ko.bindingHandlers.style.update(element,
+      function(){return {backgroundImage: "url('" + valueAccessor() + "')"}});
+  }
 };
 
 // --------------------------------------
@@ -1122,7 +1129,7 @@ $('#wma-cst-crdnbr').on('keyup', function() {
 	var cardType = $.payment.cardType( num );
 
 	$( '[id^=wma-cc-]' ).css( 'opacity', 0.3 ).addClass( 'greyscale' );
-	
+
 	if ( cardType == 'visa' || cardType == 'amex' || cardType == 'discover' || cardType == 'mastercard') {
 		$( '#wma-cc-' + cardType  ).css( 'opacity', 1 ).removeClass( 'greyscale' );
 	}

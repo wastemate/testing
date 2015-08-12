@@ -30,14 +30,14 @@
         <![endif]-->
 
         <div id="wma-app" class="wma-container">
-          <div data-bind="visible: shouldShowSearch, template: {name: 'wma-initial-template'}"></div>  
+          <div data-bind="visible: shouldShowSearch, template: {name: 'wma-initial-template'}"></div>
           <div class="wma-process__nav" data-bind="visible: shouldShowProcessNav, template: {name: 'wma-process-nav-template'}"></div>
           <div class="wma-row wma-service__location" data-bind="visible: shouldShowCategories, template: {name: 'wma-service-location-template'}"></div>
           <div class="wma-row wma-service__type" data-bind="visible: shouldShowCategories, template: { name: 'wma-category-picker-template', foreach: categories}"></div>
 
-          <div data-bind="visible: shouldShowResidentialServices, template: {name: 'wma-products-template'}"></div> 
-          <div data-bind="visible: shouldShowRollOffServices, template: {name: 'wma-products-template'}"></div> 
-          <div data-bind="visible: shouldShowRollOffMaterials, template: {name: 'wma-products-template'}"></div> 
+          <div data-bind="visible: shouldShowResidentialServices, template: {name: 'wma-products-template'}"></div>
+          <div data-bind="visible: shouldShowRollOffServices, template: {name: 'wma-products-template'}"></div>
+          <div data-bind="visible: shouldShowRollOffMaterials, template: {name: 'wma-products-template'}"></div>
 
           <!-- resi confirmation BEGIN -->
           <div class="wma-products__container" data-bind="visible: shouldChooseStart">
@@ -49,7 +49,7 @@
                     <div id='first-pickup-date-text'></div>
                     <div id='first-pickup-datepicker'></div>
                 </div>
-            
+
                 <div class="wma-products__container" data-bind="foreach: selectedServices">
                     <div class="wma-product__container">
                       <div class="wma-product__image-wrap">
@@ -72,7 +72,7 @@
               <div class="wma-products__product-wrap">
                 <p class="wma-products__title">Choose dates</p>
                 <!-- <p class="wma-products__title-note">Included with landfill price</p> -->
-            
+
                 <div class="wma-choose__selector">
                   <!-- ui datepicker -->
                   <label for="wma-start-date">Drop-off</label>
@@ -81,7 +81,7 @@
                   <!-- <input class="wma-choose__selector-date" type="datetime-local" id="wma-start-date" placeholder="Select Date"> -->
                   <!-- / -->
                 </div>
-            
+
                 <div class="wma-choose__selector">
                   <!-- ui datepicker -->
                   <label for="wma-end-date">Pick-up</label>
@@ -90,7 +90,7 @@
                   <!-- <input class="wma-choose__selector-date" type="datetime-local" id="wma-end-date" placeholder="Select Date"> -->
                   <!-- / -->
                 </div>
-            
+
                 <div class="wma-product__container">
                   <div class="wma-product__image-wrap">
                     <img src="assets/images/ph_cart.png">
@@ -102,7 +102,7 @@
                     </div>
                   </div>
                 </div>
-            
+
                 <div class="wma-choose__disclaimer">
                   <div class="wma-form__checkbox">
                     <label>
@@ -110,14 +110,14 @@
                       <span class="wma-form__block">We will try our best to accommodate your date request. You will receive an email confirming your drop-off and pick-up dates within XX business days.</span>
                     </label>
                   </div>
-            
+
                   <div class="wma-form__checkbox">
                     <input type="checkbox">
                     <label>
                       I understand that I will be charged $X per ton over XX tons included in base fare.
                     </label>
                   </div>
-            
+
                   <div class="wma-footer__next">
                     <button class="wma-footer__next-btn" data-bind="click: $root.next">Next Step</button>
                   </div>
@@ -129,7 +129,7 @@
           <!-- customer info BEGIN -->
           <div class="wma-base__container  wma-base__panel-light" data-bind="visible: shouldShowBillingInfo">
               <div class="wma-base__container-wrap">
-            
+
                 <div class="wma-row">
                   <div class="wma-info__column">
 
@@ -154,7 +154,7 @@
                     </div>
 
                   </div>
-            
+
                   <div class="wma-info__column">
                     <h3 class="wma-base__title">Customer pick-up address</h3>
 
@@ -165,7 +165,7 @@
                     <div class="wma-base__form-group col-md-6" style="width:49%;float:right;margin-top:10px;">
                       <input placeholder='Apt, suite, etc. (optional)' type="text" class="wma-base__form-control" id="wma-cst-aptste" data-bind="value: serviceAddressApt">
                     </div>
-                    
+
                     <div class="clearfix"></div>
 
                     <div class="wma-base__form-group">
@@ -183,8 +183,8 @@
                     </div>
 
                   </div>
-            
-            
+
+
                   <div class="wma-info__column">
                     <div class="wma-info__map-container">
 
@@ -195,7 +195,7 @@
                     </div>
                   </div>
                 </div>
-            
+
                 <div class="wma-row wma-base__last-row wma-base__horz-center">
                     <button class="wma-base__next-btn wma-info__checkout-btn" data-bind="click: $root.next">Checkout</button>
                 </div>
@@ -252,12 +252,12 @@
 
                     </div>
                   </div>
-                  
+
                   <div class="wma-info__column">
                     <h3 class="wma-base__title">Billing information</h3>
 
                     <div class="clearfix"></div>
-                    
+
                     <div class="wma-base__form-group">
                       <input type="text" placeholder='First name *' class="wma-base__form-control" id="wma-cst-billfn" data-bind="value: billingFirstName">
                     </div>
@@ -303,7 +303,7 @@
                     </div>
 
                   </div>
-                  
+
                   <div class="wma-info__column">
                     <div class="wma-billing__summary">
                       <address>
@@ -312,7 +312,7 @@
                         <p data-bind="text: serviceAddressCityStateZip"></p>
                         <p id='wma-btn-change-address' data-bind="click: show('siteInfo')">Change address</p>
                       </address>
-            
+
                       <!-- service detail -->
                       <div class="wma-billing__service-detail">
                         <h4 class="wma-billing__service-category">Weekly Service <span data-bind="click: show('residential')">Revise Service</span></h4>
@@ -337,7 +337,7 @@
                             <td data-bind="text: recurringTotal"></td>
                           </tr>
                         </table>
-            
+
                         <div class="wma-form__checkbox">
                           <input type="checkbox" id="wma-cst-billterms-autopay" data-bind="checked: wantsAutopay">
                           <label for="wma-cst-billterms-autopay"><em>Yes, </em>please enroll me in auto-pay. I understand that my credit card will be charged monthly for recurring trash service.</label>
@@ -349,19 +349,19 @@
                           <input type="checkbox" id="wma-cst-billterms-paperless" data-bind="checked: wantsPaperless">
                           <label for="wma-cst-billterms-paperless"><em>Yes, </em> please enroll me in paperless billing.</label>
                         </div>
-                        
+
                         <button class="wma-base__next-btn wma-billing__place-order" data-bind="click: $root.next">Place Order</button>
                       </div>
                     </div>
                   </div>
-                </div>            
+                </div>
                 <div class="wma-row">
-                  
+
                 </div>
               </div>
             </form>
           <!-- confirm and pay info END -->
-          
+
           <!-- confirmation BEGIN -->
             <div class="wma-products__container wma-confirmation__content" data-bind="visible: shouldShowConfirmation">
               <div class="wma-products__product-wrap wma-base__horz-center">
@@ -373,19 +373,19 @@
               </div>
             </div>
           <!-- confirmation END -->
-          
+
           <!-- footer BEGIN -->
           <div class="wma-footer__next" data-bind="visible: shouldShowProcessNavFooter">
             <button class="wma-footer__next-btn" data-bind="click: $root.next">Next Step</button>
           </div>
           <!-- footer END -->
           <!-- Order confirmation BEGIN -->
-          
+
           <!-- Order confirmation END -->
-        </div> 
-        
+        </div>
+
         <script type="text/html" id="wma-initial-template">
-            <div class="wma-row wma-inital__header"    data-bind="template: {name: 'wma-inital_header-template'}"></div>              
+            <div class="wma-row wma-inital__header"    data-bind="template: {name: 'wma-inital_header-template'}"></div>
             <div class="wma-row wma-initial__steps"    data-bind="template: {name: 'wma-initial_steps-template'}"></div>
             <div class="wma-row wma-initial__services" data-bind="template: {name: 'wma-category-template', foreach: categories}"></div>
         </script>
@@ -401,7 +401,7 @@
         </script>
 
         <script type="text/html" id="wma-category-picker-template">
-            <div class="wma-base__center-inline wma-service__type-container" data-bind="click: $root.loadCategory">
+            <div class="wma-base__center-inline wma-service__type-container" data-bind="click: $root.loadCategory, backgroundImage: backgroundImage">
                 <div class="wma-base__copy-wrap wma-service__type-copy-wrap">
                   <h2 class="wma-service__type-title" data-bind="text: name"></h2>
                   <h4 class="wma-service__type-supporting" data-bind="text: description"></h4>
@@ -439,7 +439,7 @@
             </ul>
         </script>
 
-        
+
         <script type="text/html" id="wma-process-nav-template">
             <div class="wma-process__nav-wrap">
                  <!--shouldShowConfirmation-->
@@ -465,7 +465,7 @@
                   <li data-bind="css: {'wma-nav__completed': materialChoosen(), '': !materialChoosen(), 'wma-nav__active': ( showing() == 'materials' ) }, click: materialChoosen() ? show('materials'): null">
                     <div class="wma-process__nav-count">1b</div>
                     <p class="wma-process__nav-desc">Choose materials</p>
-                  </li>   
+                  </li>
                   <!-- /ko -->
 
                   <!-- /ko -->
@@ -476,7 +476,7 @@
                     <p class="wma-process__nav-desc">Choose start date</p>
                   </li>
                   <!-- /ko -->
-                  
+
                   <!-- ko if: rolloffServices().length > 0 -->
                   <li data-bind="css: {'wma-nav__completed': startChoosen(), '': !startChoosen(), 'wma-nav__active': ( showing() == 'deliveryAndReview' ) }, click: cartsChoosen() ? show('deliveryAndReview'): null">
                     <div class="wma-process__nav-count">2</div>
@@ -513,11 +513,11 @@
         <!-- ko if: landfillServices().length > 0 -->
           <div class="wma-products__container" data-bind="template: {name: 'wma-products-landfill-template'}"></div>
         <!-- /ko -->
-        
+
         <!-- ko if: recyclingServices().length > 0 -->
           <div class="wma-products__container" data-bind="template: {name: 'wma-products-recycle-template'}"></div>
         <!-- /ko -->
-        
+
         <!-- ko if: organicsServices().length > 0 -->
           <div class="wma-products__container" data-bind="template: {name: 'wma-products-organics-template'}"></div>
         <!-- /ko -->
@@ -615,7 +615,7 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
         <script src="js/input-placeholder-label.js"></script>
         <script src="js/viewModel.js"></script>
-        <script src="js/index.js"></script>  
+        <script src="js/index.js"></script>
         <script src="js/liveAddressGoogle.js"></script>
         <script src="js/miniMap.js"></script>
         <script src="http://localhost:35729/livereload.js"></script>
