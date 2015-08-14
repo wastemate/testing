@@ -91,16 +91,18 @@
                   <!-- / -->
                 </div>
 
-                <div class="wma-product__container">
-                  <div class="wma-product__image-wrap">
-                    <img src="assets/images/ph_cart.png">
-                  </div>
-                  <div class="wma-product__desc-wrap">
-                    <div class="wma-base__light-border  wma-product__desc">
-                      <p class="wma-product__price">$00.00</p>
-                      <p class="wma-product__size">20 gallon</p>
+                <div class="wma-products__container" data-bind="with: selectedService">
+                    <div class="wma-product__container">
+                      <div class="wma-product__image-wrap">
+                        <img src="assets/images/ph_cart.png" data-bind="attr: {src: icon}">
+                      </div>
+                      <div class="wma-product__desc-wrap">
+                        <div class="wma-base__light-border  wma-product__desc">
+                          <p class="wma-product__price" data-bind="text: (price > 0 ? ('$' + price) : 'Included')"></p>
+                          <p class="wma-product__size" data-bind="text: name"></p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
                 </div>
 
                 <div class="wma-choose__disclaimer">
@@ -454,19 +456,18 @@
                   </li>
                   <!-- /ko -->
 
-                  <!-- ko if: rolloffServices().length > 0 -->
+                  <!-- ko if: requiresMaterial() -->
 
-                  <li data-bind="css: {'wma-nav__completed': cartsChoosen(), '': !cartsChoosen(), 'wma-nav__active': ( showing() == 'rolloff' ) }, click: cartsChoosen() ? show('rolloff'): null">
-                    <div class="wma-process__nav-count">1<!-- ko if: rolloffServices().length > 0  && requiresMaterial() -->a<!-- /ko --></div>
-                    <p class="wma-process__nav-desc">Choose bins</p>
-                  </li>
-
-                  <!-- ko if: rolloffServices().length > 0 && requiresMaterial()-->
                   <li data-bind="css: {'wma-nav__completed': materialChoosen(), '': !materialChoosen(), 'wma-nav__active': ( showing() == 'materials' ) }, click: materialChoosen() ? show('materials'): null">
-                    <div class="wma-process__nav-count">1b</div>
+                    <div class="wma-process__nav-count">1a</div>
                     <p class="wma-process__nav-desc">Choose materials</p>
                   </li>
-                  <!-- /ko -->
+
+
+                  <li data-bind="css: {'wma-nav__completed': cartsChoosen(), '': !cartsChoosen(), 'wma-nav__active': ( showing() == 'rolloff' ) }, click: cartsChoosen() ? show('rolloff'): null">
+                    <div class="wma-process__nav-count">1b</div>
+                    <p class="wma-process__nav-desc">Choose bins</p>
+                  </li>
 
                   <!-- /ko -->
 
@@ -478,7 +479,7 @@
                   <!-- /ko -->
 
                   <!-- ko if: rolloffServices().length > 0 -->
-                  <li data-bind="css: {'wma-nav__completed': startChoosen(), '': !startChoosen(), 'wma-nav__active': ( showing() == 'deliveryAndReview' ) }, click: cartsChoosen() ? show('deliveryAndReview'): null">
+                  <li data-bind="css: {'wma-nav__completed': serviceStartDate() && serviceEndDate(), '': !startChoosen(), 'wma-nav__active': ( showing() == 'deliveryAndReview' ) }, click: cartsChoosen() ? show('deliveryAndReview'): null">
                     <div class="wma-process__nav-count">2</div>
                     <p class="wma-process__nav-desc">Choose start date</p>
                   </li>
@@ -560,7 +561,7 @@
             <div class="wma-products__product-wrap">
                 <p class="wma-products__title">Choose bin</p>
                 <p class="wma-products__title-note"></p>
-                <div data-bind="template: {name: 'wma-product-template', foreach: rolloffServices }"></div>
+                <div data-bind="template: {name: 'wma-product-template', foreach: materialServices }"></div>
             </div>
         </script>
 

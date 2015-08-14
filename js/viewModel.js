@@ -77,8 +77,14 @@ function viewModel() {
 	self.organicsServices = ko.observableArray();
 	self.rolloffServices = ko.observableArray();
 
+	self.selectedService = ko.observable();
+
 	self.material = ko.observableArray();
 	self.selectedMaterial = ko.observable();
+	self.materialServices = ko.computed( function() {
+		if ( !self.selectedMaterial() ) { return []; }
+		return self.selectedMaterial().services;
+	} );
 
 
 	self.serviceDay = ko.observable();
@@ -440,6 +446,7 @@ function viewModel() {
 				}
 
 			});
+
 			//sort the arrays!
 			self.landfillServices.sort(function(left, right) { return left.name == right.name ? 0  : (left.name < right.name ? -1 : 1); });
 			self.recyclingServices.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1); });
@@ -447,9 +454,44 @@ function viewModel() {
 			self.rolloffServices.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1); });
 
 			if ( self.rolloffServices().length ) {
-				self.show("rolloff");
+
+				var allMaterials = [];
+
+				_.each( self.rolloffServices(), function( s ) {
+					allMaterials.push( s.material );
+				} );
+
+				allMaterials = _.flattenDeep( allMaterials );
+				allMaterials = _.uniq( allMaterials, function( m ) {
+					return m.name;
+				} );
+
+				// group services by material
+
+				_.each( allMaterials, function( m ) {
+
+					m.services = m.services || [];
+
+					_.each( self.rolloffServices(), function( s ) {
+
+						_.each( s.material, function( sm ) {
+							if ( sm.name == m.name ) {
+								m.services.push( s );
+							}
+						} );
+					} );
+				} );
+
+				self.material( allMaterials );
+
+				console.log( allMaterials );
+
+				self.show("materials");
+
 			} else {
+
 				self.show("residential");
+
 			}
 
 		}, function(err){
@@ -492,6 +534,15 @@ function viewModel() {
 
 		self.material.refresh();
 
+		// reset service
+		_.each( self.rolloffServices(), function( s ) {
+			s.selected = false;
+		} );
+
+		self.selectedService( null );
+		self.cartsChoosen( false );
+
+
 	};
 
 	self.selectProductService = function(data, event){
@@ -502,6 +553,9 @@ function viewModel() {
 		if(hasMatch){
 			ko.utils.arrayForEach(self.landfillServices(), function(item) {
 				item.selected = item == data;
+				if ( item.selected ) {
+					self.selectedService( item );
+				}
 				item.summary = " landfill cart";
 			});
 			self.landfillServices.refresh();
@@ -513,6 +567,9 @@ function viewModel() {
 		if(hasMatch){
 			ko.utils.arrayForEach(self.recyclingServices(), function(item) {
 				item.selected = item == data;
+				if ( item.selected ) {
+					self.selectedService( item );
+				}
 				item.summary = " recycling cart";
 			});
 			self.recyclingServices.refresh();
@@ -524,6 +581,9 @@ function viewModel() {
 		if (hasMatch) {
 			ko.utils.arrayForEach(self.organicsServices(), function(item) {
 				item.selected = item == data;
+				if ( item.selected ) {
+					self.selectedService( item );
+				}
 				item.summary = " organics cart";
 			});
 			self.organicsServices.refresh();
@@ -534,19 +594,10 @@ function viewModel() {
         });
 		if (hasMatch) {
 
-			// reset material
-			_.each( self.material(), function( m ) {
-				m.selected = false;
-			} );
-
-			// reset date
-
-			self.materialChoosen( false );
-
 			ko.utils.arrayForEach(self.rolloffServices(), function(item) {
 				item.selected = item == data;
 				if ( item.selected ) {
-					self.material( item.material );
+					self.selectedService( item );
 				}
 				item.summary = " bin";
 			});
@@ -643,18 +694,24 @@ function viewModel() {
 				});
 
 
+
+			break;
+			case "materials":
+
+				if ( !self.materialChoosen() ) {
+					alert( 'Please choose a material.' );
+					return;
+				}
+
+				self.show("rolloff");
+
+
 			break;
 			case "rolloff":
 
-				var x = self.rolloffServices();
-				var y = self.services();
-				var z = self.material();
+				console.log( self.selectedService() );
 
 				_.each( self.services(), function( s ) {
-
-					_.each( s.material, function( m ) {
-						m.icon = 'http://placehold.it/100x100';
-					} );
 
 					if ( s.selected ) {
 						self.cartsChoosen(true);
@@ -667,16 +724,127 @@ function viewModel() {
 					return;
 				}
 
-				self.show("materials");
+				// start date max = 2 weeks from today
+				// end date max = 4 weeks after start date
+
+				var numDaysInFuture = 14;
+
+				var getDates = function( startDate, numDaysAfter ) {
+
+					// if startDate used, will start from that date
 
 
-			break;
-			case "materials":
+					var daysValid = [];
+					var daysInvalid = [];
 
-				if ( !self.materialChoosen() ) {
-					alert( 'Please choose a material.' );
-					return;
-				}
+					_.times( numDaysAfter, function( n ) {
+
+						var day = moment( startDate ).add( n, 'days' );
+						var isHoliday = DateHelper.getHoliday( day );
+						var isWeekday = DateHelper.isWeekday( day );
+
+						var d = moment( day ).toDate();
+
+						if ( !isHoliday && isWeekday ) {
+							daysValid.push( d );
+						} else {
+							daysInvalid.push( d );
+						}
+
+					} );
+
+					return {
+						daysValid: daysValid,
+						daysInvalid: daysInvalid
+					};
+
+				};
+
+				var dates = getDates( moment(), numDaysInFuture );
+				availableDates = dates.daysValid;
+				invalidDates = dates.daysInvalid;
+
+
+      	$('#wma-rolloff-dropoff-date-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
+      	$('#wma-rolloff-pickup-date-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
+
+      	self.serviceStartDate( moment( self.serviceStartDate() || availableDates[0] ).toDate() );
+      	self.serviceEndDate( moment( self.serviceEndDate() || availableDates[0] ).toDate() );
+
+      	var defaultStart = moment( self.serviceStartDate() || availableDates[0] );
+
+        var dp = $('#wma-rolloff-dropoff-datepicker').datetimepicker({
+            icons: {
+                date: "fa fa-calendar",
+                up: "fa fa-arrow-up",
+                down: "fa fa-arrow-down"
+            },
+        		format: 					'MM/dd/YY',
+        		minDate: 					defaultStart,
+        		maxDate: 					availableDates[ availableDates.length - 1 ] ,
+            inline: 					true,
+				    disabledDates: 		invalidDates,
+            sideBySide: 			false,
+            defaultDate: 			defaultStart
+        });
+
+        dp.on( 'dp.change', function( e ){
+        	var d = e.date;
+        	self.serviceStartDate( d.toDate() );
+        	$('#wma-rolloff-dropoff-date-text').html( d.format('L') );
+        	initPickup();        	
+        	console.log( 'changed', d );
+        } );
+
+        // ------------------
+
+        var dp2;
+
+        var initPickup = function() {
+
+        	if ( dp2 ) {
+						$('#wma-rolloff-pickup-datepicker').data('DateTimePicker').destroy();
+        	}
+
+        	var maxDaysRent = 7 * 4;
+
+        	var dates = getDates( moment( self.serviceStartDate() ).add( 1, 'days' ), maxDaysRent );
+					var availableDates = dates.daysValid;
+					var invalidDates = dates.daysInvalid;
+
+        	var minDate = availableDates[ 0 ];
+        	var maxDate = availableDates[ availableDates.length-1 ];
+
+	      	var defaultDate = minDate;
+
+	        dp2 = $('#wma-rolloff-pickup-datepicker').datetimepicker({
+	            icons: {
+	                date: "fa fa-calendar",
+	                up: "fa fa-arrow-up",
+	                down: "fa fa-arrow-down"
+	            },
+	        		format: 					'MM/dd/YY',
+	        		minDate: 					minDate,
+	        		maxDate: 					maxDate ,
+	            inline: 					true,
+					    disabledDates: 		invalidDates,
+	            sideBySide: 			false,
+	            defaultDate: 			defaultDate
+	        });
+
+	        dp2.on( 'dp.change', function( e ){
+	        	var d = e.date;
+	        	self.serviceEndDate( d.toDate() );
+	        	$('#wma-rolloff-pickup-date-text').html( d.format('L') );
+	        	console.log( 'changed', d );
+	        } );
+
+
+        };
+
+        // initPickup = _.debounce( initPickup, 200 );
+
+        initPickup();
 
 				self.saveOrder( event, function( err ) {
 
@@ -687,6 +855,18 @@ function viewModel() {
 
 					self.show("deliveryAndReview");
 
+				} );
+
+			break;
+			case "deliveryAndReview":
+
+				wastemate.setOnDemandDates( moment( self.serviceStartDate() ).toDate() , moment( self.serviceEndDate() ).toDate()).then( function(){
+					self.startChoosen(true);
+					self.show("siteInfo");
+			    setupMiniMap( self.userLatLon().lat, self.userLatLon().lon );
+				}, function(err){
+					alert("Ooops something failed :(");
+					console.log(err);
 				} );
 
 
@@ -892,7 +1072,6 @@ function viewModel() {
 	self.saveOrderInFlight = false;
 	self.saveOrder = function (event, next){
 
-
 		//prevent double clicks!
 		if(self.saveOrderInFlight){
 			return;
@@ -941,14 +1120,35 @@ function viewModel() {
 		}
 
 		var serviceChoices = [];
-		serviceChoices.push(landfillService);
-		serviceChoices.push(recycleService);
-		serviceChoices.push(organicsService);
-		serviceChoices.push(rolloffService);
+		if(landfillService){
+				serviceChoices.push(landfillService);
+		}
+		if(recycleService){
+				serviceChoices.push(recycleService);
+		}
+		if(organicsService){
+				serviceChoices.push(organicsService);
+		}
+		if(rolloffService){
+				serviceChoices.push(rolloffService);
+		}
 
-		console.log( serviceChoices, self.selectedMaterial() );
+		var materialSelection = self.selectedMaterial();
 
-		wastemate.saveServiceSelection( serviceChoices, [ self.selectedMaterial() ] ).then(function(){
+		if(materialSelection){
+			materialSelection = {
+				icon: materialSelection.icon,
+				name: materialSelection.name
+			};
+		}
+
+		_.each( serviceChoices, function( s ) {
+			delete s.material;
+		} );
+
+		console.log( serviceChoices, materialSelection );
+
+		wastemate.saveServiceSelection( serviceChoices, materialSelection ).then(function(){
 
 			console.log("saved service selection");
 			self.saveOrderInFlight = false;
