@@ -46,7 +46,7 @@
 
 /* calendar */
 
-#first-pickup-date-text, #last-pickup-date-text {
+#first-pickup-date-text, #wma-rolloff-dropoff-date-text, #wma-rolloff-pickup-date-text {
   padding: 10px;
   font-size: 17px;
   color: #702e79;
@@ -54,7 +54,7 @@
   border: 1px solid #DDDDDD;
 }
 
-#first-pickup-datepicker th, #last-pickup-datepicker th {
+#first-pickup-datepicker th, #wma-rolloff-dropoff-datepicker th, #wma-rolloff-pickup-datepicker th {
   text-align: center;
 }
 
@@ -266,10 +266,60 @@ img.greyscale:hover {
 
 /* ============ */
 
+.wma-material__container {
+  width: 33%;
+  float: left;
+  cursor: pointer;
+}
+
+
+/* ============ */
+
 .wma-total-due {
   font-size: 20px;
 }
 
 .wma-total-recurring-monthly {
   color: #702e79;
+}
+
+label:before {
+  float: left;
+}
+
+label > span {
+  width: 85%;
+  float: right;
+}
+
+label > span > em {
+  font-weight: bold;
+}
+
+/* calendar */
+.wma-choose__selector {
+  max-width: 20%;
+}
+
+.wma-choose__disclaimer {
+  width: 35% !important;
+}
+
+@media ( max-width: 1320px ) {
+
+  .wma-choose__selector {
+    max-width: 40%;
+  }
+
+}
+
+.rolloff-template .wma-product__image-wrap {
+  height: 140px;
+}
+
+h4 > em {
+  font-family: 'proxima_nova_rgregular', Helvetica, Arial, sans-serif;
+  font-style: normal;
+  margin-right: 5px;
+  font-weight: bold;
 }

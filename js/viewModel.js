@@ -58,6 +58,9 @@ function viewModel() {
 	self.shouldShowProcessNav = ko.observable(false);
 	self.shouldShowProcessNavFooter = ko.observable(false);
 
+	self.rolloffTermsSubjectToChange = ko.observable( false );
+	self.rolloffTermsUnderstandCharge = ko.observable( false );
+
 	/* Recurring steps */
 	self.isRecurringOrder = ko.observable(false);
 	self.cartsChoosen = ko.observable(false);
@@ -81,13 +84,38 @@ function viewModel() {
 
 	self.material = ko.observableArray();
 	self.selectedMaterial = ko.observable();
+
 	self.materialServices = ko.computed( function() {
-		if ( !self.selectedMaterial() ) { return []; }
-		return self.selectedMaterial().services;
+
+		if ( !self.rolloffServices() || !self.selectedMaterial() ) { return []; }
+
+		var list = [];
+
+		_.each( self.rolloffServices(), function( s ) {
+
+			var enabled = false;
+
+			_.each( self.selectedMaterial().services, function( ms ) {
+				if ( s.name == ms.name ) {
+					enabled = true;
+				}
+			} );
+
+			s.enabled = enabled;
+
+			list.push( s );
+
+		} );
+
+		return list;
 	} );
 
 
 	self.serviceDay = ko.observable();
+
+	self.serviceType = ko.computed( function(){
+		return self.rolloffServices().length ? 'One-time service' : 'Weekly services';
+	} );
 
 	//service info
 	self.serviceStartDate = ko.observable();
@@ -96,6 +124,10 @@ function viewModel() {
 	self.serviceLastName = ko.observable();
 	self.serviceEmail = ko.observable();
 	self.servicePhone = ko.observable();
+
+	self.rolloffDatesChoosen = ko.computed( function() {
+		return self.serviceStartDate() && self.serviceEndDate() && self.rolloffTermsSubjectToChange() && self.rolloffTermsUnderstandCharge();
+	} );
 
 	self.serviceAddress = ko.observable();
 	self.serviceCity = ko.observable();
@@ -257,7 +289,7 @@ function viewModel() {
 		// remove nulls
 		deliveryDays = _.compact( deliveryDays );
 
-		console.log( deliveryDays );
+		// console.log( deliveryDays );
 
 		// {
 		// 	date: Date(),
@@ -547,15 +579,18 @@ function viewModel() {
 
 	self.selectProductService = function(data, event){
 
+		if ( ( typeof data.enabled != 'undefined' ) && !data.enabled ) {
+			return;
+		}
+
+		self.selectedService( data );
+
 		var hasMatch = ko.utils.arrayFirst(self.landfillServices(), function(item) {
             return item == data;
         });
 		if(hasMatch){
 			ko.utils.arrayForEach(self.landfillServices(), function(item) {
 				item.selected = item == data;
-				if ( item.selected ) {
-					self.selectedService( item );
-				}
 				item.summary = " landfill cart";
 			});
 			self.landfillServices.refresh();
@@ -567,9 +602,6 @@ function viewModel() {
 		if(hasMatch){
 			ko.utils.arrayForEach(self.recyclingServices(), function(item) {
 				item.selected = item == data;
-				if ( item.selected ) {
-					self.selectedService( item );
-				}
 				item.summary = " recycling cart";
 			});
 			self.recyclingServices.refresh();
@@ -581,9 +613,6 @@ function viewModel() {
 		if (hasMatch) {
 			ko.utils.arrayForEach(self.organicsServices(), function(item) {
 				item.selected = item == data;
-				if ( item.selected ) {
-					self.selectedService( item );
-				}
 				item.summary = " organics cart";
 			});
 			self.organicsServices.refresh();
@@ -596,14 +625,13 @@ function viewModel() {
 
 			ko.utils.arrayForEach(self.rolloffServices(), function(item) {
 				item.selected = item == data;
-				if ( item.selected ) {
-					self.selectedService( item );
-				}
 				item.summary = " bin";
 			});
 
 			self.rolloffServices.refresh();
 		}
+
+		self.cartsChoosen( true );
 
 
 	};
@@ -760,7 +788,7 @@ function viewModel() {
 
 				};
 
-				var dates = getDates( moment(), numDaysInFuture );
+				var dates = getDates( moment().add( 1, 'days' ), numDaysInFuture );
 				availableDates = dates.daysValid;
 				invalidDates = dates.daysInvalid;
 
@@ -846,6 +874,7 @@ function viewModel() {
 
         initPickup();
 
+
 				self.saveOrder( event, function( err ) {
 
 					if ( err ) {
@@ -859,6 +888,11 @@ function viewModel() {
 
 			break;
 			case "deliveryAndReview":
+
+				if ( !self.rolloffTermsUnderstandCharge() || !self.rolloffTermsSubjectToChange() ) {
+					alert( 'You must agree with the terms to continue.' );
+					return;
+				}
 
 				wastemate.setOnDemandDates( moment( self.serviceStartDate() ).toDate() , moment( self.serviceEndDate() ).toDate()).then( function(){
 					self.startChoosen(true);
@@ -1144,6 +1178,7 @@ function viewModel() {
 
 		_.each( serviceChoices, function( s ) {
 			delete s.material;
+			delete s.enabled;
 		} );
 
 		console.log( serviceChoices, materialSelection );
@@ -1168,6 +1203,7 @@ function viewModel() {
 	self.show = function(view){
 
 		window.invalidateAllInputs();
+		self.materialServices();
 
 		if ( self._billingIsSame() ) {
 			self.makeBillingSame();

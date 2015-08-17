@@ -92,6 +92,7 @@
                 </div>
 
                 <div class="wma-products__container" data-bind="with: selectedService">
+
                     <div class="wma-product__container">
                       <div class="wma-product__image-wrap">
                         <img src="assets/images/ph_cart.png" data-bind="attr: {src: icon}">
@@ -103,27 +104,43 @@
                         </div>
                       </div>
                     </div>
+
+                    <div class="wma-choose__disclaimer">
+
+                      <div class="wma-form__checkbox">
+                          <input type="checkbox" id='wma-rolloff-terms-a' data-bind="checked: $root.rolloffTermsSubjectToChange"> 
+                          <label class="wma-form__block" for='wma-rolloff-terms-a'>
+                            <span>
+                              <em>I understand availability is subject to change.</em>
+                              <br><br>
+                              We will try our best to accommodate your date request. You will receive an email confirming your drop-off and pick-up dates within XX business days.
+                            </span>
+                          </label>
+                      </div>
+
+                      <div class="clearfix"></div>
+
+                      <div class="wma-form__checkbox">
+                        <input type="checkbox" id='wma-rolloff-terms-b' data-bind="checked: $root.rolloffTermsUnderstandCharge">
+                        <label for='wma-rolloff-terms-b'>
+                          <span>
+                          <em>
+                            I understand that I will be charged $X per ton over XX tons included in base fare.
+                          </em>
+                          </span>
+                        </label>
+                      </div>
+
+                      <br><br>
+
+                      <div class="wma-footer__next">
+                        <button class="wma-footer__next-btn" data-bind="click: $root.next">Next Step</button>
+                      </div>
+
+                    </div>
+
                 </div>
 
-                <div class="wma-choose__disclaimer">
-                  <div class="wma-form__checkbox">
-                    <label>
-                      <input type="checkbox"> I understand availability is subject to change.
-                      <span class="wma-form__block">We will try our best to accommodate your date request. You will receive an email confirming your drop-off and pick-up dates within XX business days.</span>
-                    </label>
-                  </div>
-
-                  <div class="wma-form__checkbox">
-                    <input type="checkbox">
-                    <label>
-                      I understand that I will be charged $X per ton over XX tons included in base fare.
-                    </label>
-                  </div>
-
-                  <div class="wma-footer__next">
-                    <button class="wma-footer__next-btn" data-bind="click: $root.next">Next Step</button>
-                  </div>
-                </div>
               </div>
           </div>
           <!-- del/rem confirmation END -->
@@ -317,7 +334,10 @@
 
                       <!-- service detail -->
                       <div class="wma-billing__service-detail">
-                        <h4 class="wma-billing__service-category">Weekly Service <span data-bind="click: show('residential')">Revise Service</span></h4>
+                        <h4 class="wma-billing__service-category">
+                          <em data-bind="text: serviceType"></em>
+                          <span data-bind="click: show( $root.rolloffServices().length ? 'rolloff' : 'residential' )">Revise Service</span>
+                        </h4>
                         <table class="wma-billing__service-breakdown" data-bind="foreach: selectedServices">
                           <tr>
                             <td data-bind="text: name + summary"></td>
@@ -452,46 +472,58 @@
                   <!-- ko if: ( landfillServices().length || recyclingServices().length || organicsServices().length ) -->
                   <li data-bind="css: {'wma-nav__completed': cartsChoosen(), '': !cartsChoosen(), 'wma-nav__active': ( showing() == 'residential' ) }, click: cartsChoosen() ? show('residential'): null">
                     <div class="wma-process__nav-count">1</div>
-                    <p class="wma-process__nav-desc">Choose carts</p>
+                    <p class="wma-process__nav-desc">Choose carts </p>
                   </li>
                   <!-- /ko -->
 
                   <!-- ko if: requiresMaterial() -->
 
                   <li data-bind="css: {'wma-nav__completed': materialChoosen(), '': !materialChoosen(), 'wma-nav__active': ( showing() == 'materials' ) }, click: materialChoosen() ? show('materials'): null">
-                    <div class="wma-process__nav-count">1a</div>
+                    <div class="wma-process__nav-count">1</div>
                     <p class="wma-process__nav-desc">Choose materials</p>
                   </li>
 
 
                   <li data-bind="css: {'wma-nav__completed': cartsChoosen(), '': !cartsChoosen(), 'wma-nav__active': ( showing() == 'rolloff' ) }, click: cartsChoosen() ? show('rolloff'): null">
-                    <div class="wma-process__nav-count">1b</div>
-                    <p class="wma-process__nav-desc">Choose bins</p>
+                    <div class="wma-process__nav-count">2</div>
+                    <p class="wma-process__nav-desc">Choose bin</p>
                   </li>
 
                   <!-- /ko -->
 
                   <!-- ko if: rolloffServices().length == 0 -->
                   <li data-bind="css: {'wma-nav__completed': startChoosen(), '': !startChoosen(), 'wma-nav__active': ( showing() == 'chooseStart' ) }, click: cartsChoosen() ? show('chooseStart'): null">
-                    <div class="wma-process__nav-count">2</div>
+                    <div class="wma-process__nav-count">
+                    <!-- ko if: !requiresMaterial() -->2<!-- /ko -->
+                    <!-- ko if: requiresMaterial() -->3<!-- /ko -->
+                    </div>
                     <p class="wma-process__nav-desc">Choose start date</p>
                   </li>
                   <!-- /ko -->
 
                   <!-- ko if: rolloffServices().length > 0 -->
-                  <li data-bind="css: {'wma-nav__completed': serviceStartDate() && serviceEndDate(), '': !startChoosen(), 'wma-nav__active': ( showing() == 'deliveryAndReview' ) }, click: cartsChoosen() ? show('deliveryAndReview'): null">
-                    <div class="wma-process__nav-count">2</div>
+                  <li data-bind="css: {'wma-nav__completed': rolloffDatesChoosen(), '': !startChoosen(), 'wma-nav__active': ( showing() == 'deliveryAndReview' ) }, click: cartsChoosen() ? show('deliveryAndReview'): null">
+                    <div class="wma-process__nav-count">
+                    <!-- ko if: !requiresMaterial() -->3<!-- /ko -->
+                    <!-- ko if: requiresMaterial() -->4<!-- /ko -->
+                    </div>
                     <p class="wma-process__nav-desc">Choose start date</p>
                   </li>
                   <!-- /ko -->
 
                   <li data-bind="css: {'wma-nav__completed': addressConfirmed(), '': !addressConfirmed(), 'wma-nav__active': ( showing() == 'siteInfo' ) }, click: startChoosen() ? show('siteInfo'): null">
-                    <div class="wma-process__nav-count">3</div>
+                    <div class="wma-process__nav-count">
+                    <!-- ko if: !requiresMaterial() -->4<!-- /ko -->
+                    <!-- ko if: requiresMaterial() -->5<!-- /ko -->
+                    </div>
                     <p class="wma-process__nav-desc">Confirm address</p>
                   </li>
 
                   <li data-bind="css: {'wma-nav__completed': paymentProcessed(), '': !paymentProcessed(), 'wma-nav__active': ( showing() == 'payment' ) }, click: addressConfirmed() ? show('payment'): null">
-                    <div class="wma-process__nav-count">4</div>
+                    <div class="wma-process__nav-count">
+                    <!-- ko if: !requiresMaterial() -->5<!-- /ko -->
+                    <!-- ko if: requiresMaterial() -->6<!-- /ko -->
+                    </div>
                     <p class="wma-process__nav-desc">Payment information</p>
                   </li>
 
@@ -561,7 +593,7 @@
             <div class="wma-products__product-wrap">
                 <p class="wma-products__title">Choose bin</p>
                 <p class="wma-products__title-note"></p>
-                <div data-bind="template: {name: 'wma-product-template', foreach: materialServices }"></div>
+                <div class='rolloff-template' data-bind="template: {name: 'wma-product-template', foreach: materialServices }"></div>
             </div>
         </script>
 
@@ -574,7 +606,7 @@
         </script>
 
         <script type="text/html" id="wma-materials-template">
-            <div class="wma-product__container" data-bind="click: $root.selectMaterial, style: {'opacity': (!(typeof selected === 'undefined') && selected) ? '1' : '.7'}">
+            <div class="wma-material__container" data-bind="click: $root.selectMaterial, style: {'opacity': (!(typeof selected === 'undefined') && selected) ? '1' : '.7'}">
               <div class="wma-product__image-wrap">
                 <img src="assets/images/ph_cart.png" data-bind="attr: {src: icon}">
               </div>
@@ -587,7 +619,7 @@
         </script>
 
         <script type="text/html" id="wma-product-template">
-            <div class="wma-product__container" data-bind="click: $root.selectProductService, style: {'opacity': (!(typeof selected === 'undefined') && selected) ? '1' : '.7'}">
+            <div class="wma-product__container" data-bind="click: $root.selectProductService, style: {'opacity': !(typeof enabled == 'undefined') && !enabled ? '.3' : ( (!(typeof selected === 'undefined') && selected) ? '1' : '.7' )}">
               <div class="wma-product__image-wrap">
                 <img src="assets/images/ph_cart.png" data-bind="attr: {src: icon}">
               </div>
