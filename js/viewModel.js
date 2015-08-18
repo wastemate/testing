@@ -58,6 +58,8 @@ function viewModel() {
 	self.shouldShowProcessNav = ko.observable(false);
 	self.shouldShowProcessNavFooter = ko.observable(false);
 
+	self.noServiceSelection = ko.observable(false);
+
 	self.rolloffTermsSubjectToChange = ko.observable( false );
 	self.rolloffTermsUnderstandCharge = ko.observable( false );
 
@@ -444,11 +446,14 @@ function viewModel() {
 		console.log("Clicked");
 		console.log(data);
 
-		if ( data.requiresMaterial ) {
-			self.requiresMaterial(true);
-		}
-
 		wastemate.getServices(data.line).then(function(services){
+
+			if ( services.length == 0 ) {
+				self.noServiceSelection( true );
+				self.show( 'siteInfo' );
+				setupMiniMap( self.userLatLon().lat, self.userLatLon().lon );
+				return;
+			}
 
 			//clear out all services currently in the view model arrays
 			self.services([]);
@@ -531,7 +536,7 @@ function viewModel() {
 				//most likely we need the users address before they continue.
 				alert("Address required before choosing service category");
 			}
-		})
+		});
 
 	};
 
@@ -566,14 +571,22 @@ function viewModel() {
 
 		self.material.refresh();
 
-		// reset service
+		// deselect all services
 		_.each( self.rolloffServices(), function( s ) {
 			s.selected = false;
 		} );
 
+
 		self.selectedService( null );
 		self.cartsChoosen( false );
 
+		// auto-select bin if only 1 is available
+
+		if ( self.selectedMaterial().services.length == 1 ) {
+			var s = self.selectedMaterial().services[0];
+			self.selectProductService( s );
+			console.log( s );
+		}
 
 	};
 
@@ -633,6 +646,7 @@ function viewModel() {
 
 		self.cartsChoosen( true );
 
+		console.log( 'choose item: ', data );
 
 	};
 
@@ -1179,6 +1193,7 @@ function viewModel() {
 		_.each( serviceChoices, function( s ) {
 			delete s.material;
 			delete s.enabled;
+			delete s.selected;
 		} );
 
 		console.log( serviceChoices, materialSelection );

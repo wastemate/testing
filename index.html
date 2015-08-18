@@ -225,7 +225,7 @@
           <form autocomplete='on' class="wma-base__container wma-base__padded wma-base__panel-light" data-bind="visible: shouldShowPaymentInfo">
               <div class="wma-base__container-wrap">
                 <div class="wma-row">
-                  <div class="wma-info__column">
+                  <div class="wma-info__column" data-bind="visible: !noServiceSelection()">
                     <h3 class="wma-base__title">
                       Payment
                       <img id='wma-cc-discover' class='img-responsive' src="assets/images/cc/discover.png">
@@ -333,7 +333,7 @@
                       </address>
 
                       <!-- service detail -->
-                      <div class="wma-billing__service-detail">
+                      <div class="wma-billing__service-detail" data-bind="visible: !noServiceSelection()">
                         <h4 class="wma-billing__service-category">
                           <em data-bind="text: serviceType"></em>
                           <span data-bind="click: show( $root.rolloffServices().length ? 'rolloff' : 'residential' )">Revise Service</span>
@@ -347,7 +347,7 @@
                       </div>
 
                       <!-- / service detail -->
-                      <div class="wma-billing__total">
+                      <div class="wma-billing__total" data-bind="visible: !noServiceSelection()">
 
                         <table>
                           <tr class='wma-total-due'>
@@ -372,8 +372,12 @@
                           <label for="wma-cst-billterms-paperless"><em>Yes, </em> please enroll me in paperless billing.</label>
                         </div>
 
-                        <button class="wma-base__next-btn wma-billing__place-order" data-bind="click: $root.next">Place Order</button>
                       </div>
+
+                      <button class="wma-base__next-btn wma-billing__place-order" data-bind="click: $root.next">
+                      <span data-bind="text: noServiceSelection() ? 'Get Quote' : 'Place Order'"></span>
+                      </button>
+
                     </div>
                   </div>
                 </div>
@@ -468,6 +472,7 @@
                 <h3 class="wma-process__nav-confnum" data-bind="visible: shouldShowConfirmation">Order confirmation # <span data-bind="text: accountNumber"></span></h3>
                 <ul>
 
+                <!-- ko: if: noServiceSelection() -->
 
                   <!-- ko if: ( landfillServices().length || recyclingServices().length || organicsServices().length ) -->
                   <li data-bind="css: {'wma-nav__completed': cartsChoosen(), '': !cartsChoosen(), 'wma-nav__active': ( showing() == 'residential' ) }, click: cartsChoosen() ? show('residential'): null">
@@ -491,11 +496,13 @@
 
                   <!-- /ko -->
 
-                  <!-- ko if: rolloffServices().length == 0 -->
+                  <!-- ko if: rolloffServices().length == 0 && !noServiceSelection() -->
                   <li data-bind="css: {'wma-nav__completed': startChoosen(), '': !startChoosen(), 'wma-nav__active': ( showing() == 'chooseStart' ) }, click: cartsChoosen() ? show('chooseStart'): null">
                     <div class="wma-process__nav-count">
+                    
                     <!-- ko if: !requiresMaterial() -->2<!-- /ko -->
                     <!-- ko if: requiresMaterial() -->3<!-- /ko -->
+
                     </div>
                     <p class="wma-process__nav-desc">Choose start date</p>
                   </li>
@@ -504,8 +511,10 @@
                   <!-- ko if: rolloffServices().length > 0 -->
                   <li data-bind="css: {'wma-nav__completed': rolloffDatesChoosen(), '': !startChoosen(), 'wma-nav__active': ( showing() == 'deliveryAndReview' ) }, click: cartsChoosen() ? show('deliveryAndReview'): null">
                     <div class="wma-process__nav-count">
+
                     <!-- ko if: !requiresMaterial() -->3<!-- /ko -->
                     <!-- ko if: requiresMaterial() -->4<!-- /ko -->
+
                     </div>
                     <p class="wma-process__nav-desc">Choose start date</p>
                   </li>
@@ -513,19 +522,41 @@
 
                   <li data-bind="css: {'wma-nav__completed': addressConfirmed(), '': !addressConfirmed(), 'wma-nav__active': ( showing() == 'siteInfo' ) }, click: startChoosen() ? show('siteInfo'): null">
                     <div class="wma-process__nav-count">
-                    <!-- ko if: !requiresMaterial() -->4<!-- /ko -->
-                    <!-- ko if: requiresMaterial() -->5<!-- /ko -->
+
+                    <!-- ko if: !noServiceSelection() -->
+                      <!-- ko if: !requiresMaterial() -->4<!-- /ko -->
+                      <!-- ko if: requiresMaterial() -->5<!-- /ko -->
+                    <!-- /ko -->
+                    
+                    <!-- ko if: noServiceSelection() -->
+                    1
+                    <!-- /ko -->
+
+
+
                     </div>
                     <p class="wma-process__nav-desc">Confirm address</p>
                   </li>
 
                   <li data-bind="css: {'wma-nav__completed': paymentProcessed(), '': !paymentProcessed(), 'wma-nav__active': ( showing() == 'payment' ) }, click: addressConfirmed() ? show('payment'): null">
                     <div class="wma-process__nav-count">
-                    <!-- ko if: !requiresMaterial() -->5<!-- /ko -->
-                    <!-- ko if: requiresMaterial() -->6<!-- /ko -->
+
+
+                    <!-- ko if: !noServiceSelection() -->
+                      <!-- ko if: !requiresMaterial() -->5<!-- /ko -->
+                      <!-- ko if: requiresMaterial() -->6<!-- /ko -->
+                    <!-- /ko -->
+                    
+                    <!-- ko if: noServiceSelection() -->
+                    2
+                    <!-- /ko -->
+
+
                     </div>
                     <p class="wma-process__nav-desc">Payment information</p>
                   </li>
+
+                <!-- /ko -->
 
                 </ul>
             </div>
