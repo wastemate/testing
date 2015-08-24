@@ -1,5 +1,5 @@
 
-@import url(http://fonts.googleapis.com/css?family=Roboto+Mono:100);
+@import url(//fonts.googleapis.com/css?family=Roboto+Mono:100);
 
 .clearfix {
   clear: both;
@@ -20,19 +20,6 @@
   cursor: pointer;
 }
 
-#wma-app .wma-info__checkout-btn {
-  padding: 10px 0;
-}
-#wma-app .wma-info__map-container {
-  background: none;
-  margin-top: 55px !important;
-}
-#wma-app .wma-info__map-container:after {
-  padding-top: 0;
-}
-#wma-app .wma-service__location-map-container {
-  background-image: '';
-}
 #interactive_map {
   height: 300px;
   width: 100%;
@@ -59,9 +46,7 @@
 }
 
 #wma-app .wma-products__title-note {
-  font-style: normal;
   color: #333333;
-  font-family: 'proxima_novalight';
 }
 
 .bootstrap-datetimepicker-widget {
@@ -110,15 +95,6 @@
 .wma-base__form-group.col-md-6 {
   padding-left: 0 !important;
   padding-right: 0 !important;
-}
-
-.wma-info__map-container {
-  margin-top: 70px !important;
-}
-
-.wma-info__map-container > span {
-  color: #702e79;
-  font-family: 'proxima_novalight';
 }
 
 /* billing */

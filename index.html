@@ -32,7 +32,7 @@
         <div id="wma-app" class="wma-container">
           <div data-bind="visible: shouldShowSearch, template: {name: 'wma-initial-template'}"></div>
           <div class="wma-process__nav" data-bind="visible: shouldShowProcessNav, template: {name: 'wma-process-nav-template'}"></div>
-          <div class="wma-row wma-service__location" data-bind="visible: shouldShowCategories, template: {name: 'wma-service-location-template'}"></div>
+          <!--<div class="wma-row wma-service__location" data-bind="visible: shouldShowCategories, template: {name: 'wma-service-location-template'}"></div>-->
           <div class="wma-row wma-service__type" data-bind="visible: shouldShowCategories, template: { name: 'wma-category-picker-template', foreach: categories}"></div>
 
           <div data-bind="visible: shouldShowResidentialServices, template: {name: 'wma-products-template'}"></div>
@@ -421,7 +421,7 @@
         <script type="text/html" id="wma-initial-template">
             <div class="wma-row wma-inital__header"    data-bind="template: {name: 'wma-inital_header-template'}"></div>
             <div class="wma-row wma-initial__steps"    data-bind="template: {name: 'wma-initial_steps-template'}"></div>
-            <div class="wma-row wma-initial__services" data-bind="template: {name: 'wma-category-template', foreach: categories}"></div>
+            <!--<div class="wma-row wma-initial__services" data-bind="template: {name: 'wma-category-template', foreach: categories}"></div>-->
         </script>
 
         <script type="text/html" id="wma-category-template">
@@ -436,7 +436,7 @@
 
         <script type="text/html" id="wma-category-picker-template">
             <div class="wma-base__center-inline wma-service__type-container" data-bind="click: $root.loadCategory, backgroundImage: backgroundImage">
-                <div class="wma-base__copy-wrap wma-service__type-copy-wrap">
+                <div class="wma-service__type-copy-wrap">
                   <h2 class="wma-service__type-title" data-bind="text: name"></h2>
                   <h4 class="wma-service__type-supporting" data-bind="text: description"></h4>
                 </div>
@@ -719,11 +719,11 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
         <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.14.30/js/bootstrap-datetimepicker.min.js"></script>
-        <script src="https://www.promisejs.org/polyfills/promise-6.1.0.min.js"></script>
+        <script src="//www.promisejs.org/polyfills/promise-6.1.0.min.js"></script>
         <script src="//www.parsecdn.com/js/parse-1.4.2.min.js"></script>
         <script src="wastemate.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
-        <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyDkNkOrlhv8qDAznL8boO3lMXBQUAopnt0"></script>
+        <script src="//maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyDkNkOrlhv8qDAznL8boO3lMXBQUAopnt0"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
         <script src="js/input-placeholder-label.js"></script>
         <script src="js/viewModel.js"></script>
@@ -731,6 +731,5 @@
         <script src="js/liveAddressGoogle.js"></script>
         <script src="js/miniMap.js"></script>
         <script src="http://localhost:35729/livereload.js"></script>
-
     </body>
 </html>
