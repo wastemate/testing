@@ -48,6 +48,9 @@ function viewModel() {
 	self.shouldShowCategories = ko.observable(false);
 	self.shouldChooseLob = ko.observable(false);
 	self.shouldShowResidentialServices = ko.observable(false);
+	self.shouldShowResidentialLandfill = ko.observable(false);
+	self.shouldShowResidentialRecycle = ko.observable(false);
+	self.shouldShowResidentialOrganics = ko.observable(false);
 	self.shouldShowRollOffMaterials = ko.observable(false);
 	self.shouldShowRollOffServices = ko.observable(false);
 	self.shouldChooseStart = ko.observable(false);
@@ -81,7 +84,8 @@ function viewModel() {
 	self.recyclingServices = ko.observableArray();
 	self.organicsServices = ko.observableArray();
 	self.rolloffServices = ko.observableArray();
-
+	self.servicesHaveLoaded = ko.observable();
+	
 	self.selectedService = ko.observable();
 
 	self.material = ko.observableArray();
@@ -302,39 +306,28 @@ function viewModel() {
 	});
 
 	self.selectedServices = ko.computed(function(){
+		//only run this when services have finished loading
+		if(!self.servicesHaveLoaded()){
+			return [];
+		}
+		
 		var services = [];
-		var landfill = ko.utils.arrayFirst(self.landfillServices(), function(item) {
-            return item.selected == true;
-        });
-
-		if(landfill){
-			services.push(landfill);
-		}
-
-		var recycling = ko.utils.arrayFirst(self.recyclingServices(), function(item) {
-            return item.selected == true;
-        });
-
-		if(recycling){
-			services.push(recycling);
-		}
-
-		var organics = ko.utils.arrayFirst(self.organicsServices(), function(item) {
-            return item.selected == true;
-        });
-
-		if(organics){
-			services.push(organics);
-		}
-
-		var rolloff = ko.utils.arrayFirst(self.rolloffServices(), function(item) {
-            return item.selected == true;
-        });
-
-		if(rolloff){
-			services.push(rolloff);
-		}
-
+		
+		var serviceObjects = [
+			self.landfillServices, 
+			self.recyclingServices, 
+			self.organicsServices, 
+			self.rolloffServices];
+		
+		_.each(serviceObjects, function(serviceObject){
+			var selected = _.find(serviceObject(), function(item) {
+            	return item.selected === true;
+			});
+			if(selected){
+				services.push(selected);
+			}
+		});
+		
 		return services;
 	});
 
@@ -467,29 +460,42 @@ function viewModel() {
 				self.services.push(service);
 
 				if(service.type.name == "Landfill"){
-				  self.landfillServices.push(service);
+					service.selected = false;
+					service.summary = "Landfill service";
+				  	self.landfillServices.push(service);
 				}
 
 				if(service.type.name == "Recycling"){
-				  self.recyclingServices.push(service);
+					service.selected = false;
+					service.summary = "Recycling service";
+				  	self.recyclingServices.push(service);
 				}
 
 				if(service.type.name == "Organics"){
-				  self.organicsServices.push(service);
+					service.selected = false;
+					service.summary = "Recycling service";
+				  	self.organicsServices.push(service);
 				}
 
 				if(service.type.name == "RollOff"){
+					service.selected = false;
+					service.summary = "Recycling service";
 				  self.rolloffServices.push(service);
 				}
-
 			});
 
-			//sort the arrays!
+			//sort the arrays by name (price)
 			self.landfillServices.sort(function(left, right) { return left.name == right.name ? 0  : (left.name < right.name ? -1 : 1); });
 			self.recyclingServices.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1); });
 			self.organicsServices.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1); });
 			self.rolloffServices.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1); });
 
+			// select residential defaults
+			self.selectResidentialDefaults(self.landfillServices, true);
+			self.selectResidentialDefaults(self.recyclingServices, false);
+			self.selectResidentialDefaults(self.organicsServices, false);
+			self.servicesHaveLoaded(true);
+			
 			if ( self.rolloffServices().length ) {
 
 				var allMaterials = [];
@@ -527,7 +533,8 @@ function viewModel() {
 
 			} else {
 
-				self.show("residential");
+				// start with landfill selection
+				self.show("residentialLandfill");
 
 			}
 
@@ -552,8 +559,8 @@ function viewModel() {
 	self.selectMaterial = function( data, event ) {
 
 		hasMatch = ko.utils.arrayFirst(self.material(), function(item) {
-	    return item == data;
-    });
+	    	return item == data;
+    	});
 
 		if (hasMatch) {
 
@@ -569,7 +576,7 @@ function viewModel() {
 
 		}
 
-		self.material.refresh();
+		self.material.valueHasMutated();
 
 		// deselect all services
 		_.each( self.rolloffServices(), function( s ) {
@@ -588,67 +595,109 @@ function viewModel() {
 			console.log( s );
 		}
 
+		// hack to refresh view
+		self.show( 'materials' );
+
 	};
 
+	self.isResidential = function( service ) {
+
+		var isResidential = false;
+
+		// check if is residential service
+		_.each( [
+			self.landfillServices(),
+			self.recyclingServices(),
+			self.organicsServices(),
+		], function( serviceList ) {
+			
+			_.each( serviceList, function( s ) {
+				if ( s.guid == service.guid) {
+					isResidential = true;
+				}
+			} );
+
+		} );
+
+		return isResidential;
+
+	};
+	
+	self.selectProductShow = function(data){
+		if ( self.isResidential( data ) ) {
+			self.show( 'residential' );
+		} else {
+			self.show( 'rolloff' );
+		}	
+	};
+	
 	self.selectProductService = function(data, event){
 
 		if ( ( typeof data.enabled != 'undefined' ) && !data.enabled ) {
 			return;
 		}
 
+		if ( data.selected ) {
+			self.selectProductShow(data);
+			return;
+		}
+
+		//map the services
+		var serviceObjects = [
+			self.landfillServices, 
+			self.recyclingServices, 
+			self.organicsServices, 
+			self.rolloffServices];
+		
+		_.each(serviceObjects, function(serviceObject){
+			var services = serviceObject();
+			//see if the selected service is in this category
+			var hasMatch = _.find(services, function(item) {
+            	return item.guid === data.guid;
+			});
+			if(hasMatch){
+				//if so, reset the selected value on all of the services
+				_.each(services, function(item) {
+					item.selected = item.guid === data.guid;
+				});
+				serviceObject(services);
+			}
+		});
+		
 		self.selectedService( data );
-
-		var hasMatch = ko.utils.arrayFirst(self.landfillServices(), function(item) {
-            return item == data;
-        });
-		if(hasMatch){
-			ko.utils.arrayForEach(self.landfillServices(), function(item) {
-				item.selected = item == data;
-				item.summary = " landfill cart";
-			});
-			self.landfillServices.refresh();
-		}
-
-		hasMatch = ko.utils.arrayFirst(self.recyclingServices(), function(item) {
-            return item == data;
-        });
-		if(hasMatch){
-			ko.utils.arrayForEach(self.recyclingServices(), function(item) {
-				item.selected = item == data;
-				item.summary = " recycling cart";
-			});
-			self.recyclingServices.refresh();
-		}
-
-		hasMatch = ko.utils.arrayFirst(self.organicsServices(), function(item) {
-            return item == data;
-        });
-		if (hasMatch) {
-			ko.utils.arrayForEach(self.organicsServices(), function(item) {
-				item.selected = item == data;
-				item.summary = " organics cart";
-			});
-			self.organicsServices.refresh();
-		}
-
-		hasMatch = ko.utils.arrayFirst(self.rolloffServices(), function(item) {
-            return item == data;
-        });
-		if (hasMatch) {
-
-			ko.utils.arrayForEach(self.rolloffServices(), function(item) {
-				item.selected = item == data;
-				item.summary = " bin";
-			});
-
-			self.rolloffServices.refresh();
-		}
-
-		self.cartsChoosen( true );
-
+		self.selectProductShow(data);
 		console.log( 'choose item: ', data );
+	};
+
+	self.onClickCartChangeSize = function( data, event ) {
+		console.log( 'event', event );
+		console.log( 'data', data );
+
+		if ( _.contains( self.landfillServices(), data ) ) {
+			self.show( 'residentialLandfill' );
+			console.log( 'show residentialLandfill' );
+		} else if ( _.contains( self.recyclingServices(), data ) ) {
+			self.show( 'residentialRecycle' );
+			console.log( 'show residentialRecycle' );
+		} else if ( _.contains( self.organicsServices(), data ) ) {
+			self.show( 'residentialOrganics' );
+			console.log( 'show residentialOrganics' );
+		}
 
 	};
+
+	self.selectResidentialDefaults = function(serviceObject, isLandfill){
+		var services = serviceObject()
+		if(services && !_.isEmpty(services)){
+			//reset the defaults
+			var item = isLandfill ? _.first( services ) : _.last( services );
+			if(item){
+				item.selected = true;
+				//update the container
+				serviceObject.valueHasMutated();
+			}
+		}
+	}
 
 	self.next = function(data, event) {
 		switch(self.showing()){
@@ -656,28 +705,6 @@ function viewModel() {
 				//store selection in a pending order
 				//save order should really return a promise... but this is a demo!
 				self.saveOrder(event, function( err ) {
-
-					if ( err ) {
-						self.saveOrderInFlight = false;
-						if ( _.isArray( err ) && err.length > 0 ) {
-							// is array of errors
-							// build error message string
-							var msg = (function(){
-								var tmp = '';
-								_.each( err, function( item, index ) {
-									var prefix = ( err.length > 2 && index > 0 ) ? ', ' : '';
-											prefix = ( err.length > 1 && index == err.length-1 ) ? ' and ' : prefix;
-									tmp += ( prefix + item );
-								} );
-								return tmp;
-							} )();
-							alert( 'Oops. Please select ' + msg + '.' );
-						} else {
-							// is API err
-							alert( 'Oops: ' + err.toString() );
-						}
-						return;
-					}
 
 					var availableDates = [];
 					_.each( self.avaiableDeliveryDates(), function( item ) {
@@ -1126,59 +1153,30 @@ function viewModel() {
 		} else {
 			self.saveOrderInFlight = true;
 		}
-
-		var landfillService = ko.utils.arrayFirst(self.landfillServices(), function(item) {
-            return item.selected == true;
-        });
-
-		var recycleService = ko.utils.arrayFirst(self.recyclingServices(), function(item) {
-            return item.selected == true;
-        });
-
-		var organicsService = ko.utils.arrayFirst(self.organicsServices(), function(item) {
-            return item.selected == true;
-        });
-
-		var rolloffService = ko.utils.arrayFirst(self.rolloffServices(), function(item) {
-            return item.selected == true;
-        });
-
-
+		
+		var serviceObjects = [
+			self.landfillServices, 
+			self.recyclingServices, 
+			self.organicsServices, 
+			self.rolloffServices];
 		var err = [];
-
-		if( self.landfillServices().length && !landfillService ){
-			err.push("a landfill cart");
-		}
-
-		if( self.recyclingServices().length && !recycleService ){
-			err.push("a recycling cart");
-		}
-
-		if( self.organicsServices().length && !organicsService ){
-			err.push("an organics cart");
-		}
-
-		if( self.rolloffServices().length && !rolloffService ){
-			err.push("a rolloff bin");
-		}
+		var serviceChoices = [];
+		
+		_.each(serviceObjects, function(serviceObject){
+			var selected = _.find(serviceObject(), function(item) {
+            	return item.selected === true;
+			});
+			if(selected){
+				serviceChoices.push(_.clone(selected));
+			} else if(!_.isEmpty(serviceObject())) {
+				var item = serviceObject[0].type.name;
+				err.push("a " + item.toLower() + " service");
+			}
+		});		
 
 		if ( err.length > 0 ) {
 			next( err );
 			return;
-		}
-
-		var serviceChoices = [];
-		if(landfillService){
-				serviceChoices.push(landfillService);
-		}
-		if(recycleService){
-				serviceChoices.push(recycleService);
-		}
-		if(organicsService){
-				serviceChoices.push(organicsService);
-		}
-		if(rolloffService){
-				serviceChoices.push(rolloffService);
 		}
 
 		var materialSelection = self.selectedMaterial();
@@ -1191,6 +1189,7 @@ function viewModel() {
 		}
 
 		_.each( serviceChoices, function( s ) {
+			//Service choices are clones, so this is safe.
 			delete s.material;
 			delete s.enabled;
 			delete s.selected;
@@ -1217,7 +1216,11 @@ function viewModel() {
 
 	self.show = function(view){
 
+		console.log( view );
+
 		window.invalidateAllInputs();
+
+		// refresh
 		self.materialServices();
 
 		if ( self._billingIsSame() ) {
@@ -1228,6 +1231,9 @@ function viewModel() {
 				self.shouldShowSearch(false);
 				self.shouldShowCategories(false);
 				self.shouldShowResidentialServices(false);
+				self.shouldShowResidentialLandfill(false);
+				self.shouldShowResidentialRecycle(false);
+				self.shouldShowResidentialOrganics(false);
 				self.shouldShowRollOffMaterials(false);
 				self.shouldShowRollOffServices(false);
 				self.shouldShowDeliveryAndReview(false);
@@ -1242,74 +1248,82 @@ function viewModel() {
 		switch(view){
 			case "loading":
 				hideAll();
-				self.showing("loading");
 			break;
 			case "search":
 				hideAll();
 				self.shouldShowSearch(true);
-				self.showing("search");
 				break;
 			case "categries":
 				hideAll();
 				self.shouldShowCategories(true);
-				self.showing("categries");
 				break;
+
 			case "residential":
 				hideAll();
 				self.shouldShowResidentialServices(true);
 				self.shouldShowProcessNav(true);
 				self.shouldShowProcessNavFooter(true);
-				self.showing("residential");
 				break;
+			case "residentialLandfill":
+				hideAll();
+				self.shouldShowResidentialLandfill(true);
+				self.shouldShowProcessNav(true);
+				break;
+			case "residentialRecycle":
+				hideAll();
+				self.shouldShowResidentialRecycle(true);
+				self.shouldShowProcessNav(true);
+				break;
+			case "residentialOrganics":
+				hideAll();
+				self.shouldShowResidentialOrganics(true);
+				self.shouldShowProcessNav(true);
+				break;
+
 			case "chooseStart":
 				hideAll();
 				self.shouldChooseStart(true);
 				self.shouldShowProcessNav(true);
 				self.shouldShowProcessNavFooter(true);
-				self.showing("chooseStart");
 			break;
 			case "deliveryAndReview":
 				hideAll();
 				self.shouldShowDeliveryAndReview(true);
 				self.shouldShowProcessNav(true);
-				self.showing("deliveryAndReview");
 				break;
 			case "materials":
 				hideAll();
 				self.shouldShowRollOffMaterials(true);
 				self.shouldShowProcessNav(true);
 				self.shouldShowProcessNavFooter(true);
-				self.showing("materials");
 				break;
 			case "rolloff":
 				hideAll();
 				self.shouldShowRollOffServices(true);
 				self.shouldShowProcessNav(true);
 				self.shouldShowProcessNavFooter(true);
-				self.showing("rolloff");
 				break;
 			case "siteInfo":
 				hideAll();
 				self.shouldShowBillingInfo(true);
 				self.shouldShowProcessNav(true);
-				self.showing("siteInfo");
 				break;
 			case "payment":
 				hideAll();
 				self.shouldShowPaymentInfo(true);
 				self.shouldShowProcessNav(true);
-				self.showing("payment");
 				break;
 			case "confirmation":
 				hideAll();
 				self.shouldShowConfirmation(true);
 				self.shouldShowProcessNav(true);
-				self.showing("confirmation");
 				break;
 			default:
 				hideAll();
-				self.showing("");
 		}
+
+		self.showing( view );
+
 	};
 };
 
