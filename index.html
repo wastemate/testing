@@ -13,16 +13,10 @@
         <link rel="stylesheet" href="assets/css/fonts.css">
         <link rel="stylesheet" href="assets/css/main.css">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.14.30/css/bootstrap-datetimepicker.css">
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.14.30/css/bootstrap-datetimepicker.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css">
         <link rel="stylesheet" href="assets/css/refinements.css">
         <link rel="stylesheet" href="assets/css/animations.css">
-        <!--
-        <style>
-            #wma-app .wma-info__map-container{display: none;}
-        </style>
-        -->
-
     </head>
     <body>
         <!--[if lt IE 8]>
@@ -32,7 +26,6 @@
         <div id="wma-app" class="wma-container">
           <div data-bind="visible: shouldShowSearch, template: {name: 'wma-initial-template'}"></div>
           <div class="wma-process__nav" data-bind="visible: shouldShowProcessNav, template: {name: 'wma-process-nav-template'}"></div>
-          <!--<div class="wma-row wma-service__location" data-bind="visible: shouldShowCategories, template: {name: 'wma-service-location-template'}"></div>-->
           <div class="wma-row wma-service__type" data-bind="visible: shouldShowCategories, template: { name: 'wma-category-picker-template', foreach: categories}"></div>
 
           <div data-bind="visible: shouldShowResidentialServices, template: {name: 'wma-products-template'}"></div>
@@ -421,17 +414,6 @@
         <script type="text/html" id="wma-initial-template">
             <div class="wma-row wma-inital__header"    data-bind="template: {name: 'wma-inital_header-template'}"></div>
             <div class="wma-row wma-initial__steps"    data-bind="template: {name: 'wma-initial_steps-template'}"></div>
-            <!--<div class="wma-row wma-initial__services" data-bind="template: {name: 'wma-category-template', foreach: categories}"></div>-->
-        </script>
-
-        <script type="text/html" id="wma-category-template">
-            <div class="wma-initial__service" data-bind="click: $root.loadCategory">
-                <div class="wma-initial__service-img-wrap">
-                    <img src="assets/images/bins/can_black.svg" alt="" class="wma-initial__can-black" data-bind="attr: {src: icon, alt: name}">
-                </div>
-                <h3 class="service-title" data-bind="text: name"></h3>
-                <p class="service-description" data-bind="text: description"></p>
-            </div>
         </script>
 
         <script type="text/html" id="wma-category-picker-template">
@@ -552,16 +534,6 @@
             </div>
         </script>
 
-        <script type="text/html" id="wma-service-location-template">
-            <div class="wma-base__center-inline wma-service__location-map">
-              <div class="wma-service__location-map-container" data-bind="style: { backgroundImage: 'url(\'' +  serviceMapUrl() + '\')' }" ></div>
-            </div>
-            <div class="wma-base__center-inline wma-service__location-details">
-              <p class="wma-service__location-heading">Choose service for</p>
-              <input id="lob_address" class="wma-base__text-input wma-base__light-border wma-service__location-form" type="text" data-bind="value: serviceAddress() + ', ' + serviceCity() + ' ' + serviceStateShort()">
-            </div>
-        </script>
-
         <script type="text/html" id="wma-products-template">
 
         <!-- ko if: landfillServices().length > 0 || recyclingServices().length > 0 || organicsServices().length > 0-->
@@ -652,7 +624,7 @@
         </script>
 
         <script type="text/html" id="wma-product-summary-template">
-            <div class="wma-product__container" data-bind="click: $root.selectProductService, style: {'opacity': !(typeof enabled == 'undefined') && !enabled ? '.3' : ( (!(typeof selected === 'undefined') && selected) ? '1' : '.7' )}">
+            <div class="wma-product__container" data-bind="style: {'opacity': !(typeof enabled == 'undefined') && !enabled ? '.3' : ( (!(typeof selected === 'undefined') && selected) ? '1' : '.7' )}">
               <div class='wma-product__top_desc'>
                 <p class="wma-product__size" data-bind="text: type.name"></p>
                 <p class="wma-product__size" data-bind="text: name"></p>
@@ -673,7 +645,7 @@
         </script>
 
         <script type="text/html" id="wma-product-template">
-            <div class="wma-product__container" data-bind="style: {'opacity': !(typeof enabled == 'undefined') && !enabled ? '.3' : ( (!(typeof selected === 'undefined') && selected) ? '1' : '.7' )}">
+            <div class="wma-product__container" data-bind="click: $root.selectProductService, style: {'opacity': !(typeof enabled == 'undefined') && !enabled ? '.3' : ( (!(typeof selected === 'undefined') && selected) ? '1' : '.7' )}">
               <div class='wma-product__top_desc'>
                 <p class="wma-product__size" data-bind="text: name"></p>
               </div>

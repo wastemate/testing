@@ -24,14 +24,14 @@ var setupLiveAddressGoogle = function( viewModel ) {
     } );
 
     // second (lob) input
-    var input2 = document.getElementById( 'lob_address' );
+    /*var input2 = document.getElementById( 'lob_address' );
     var autocomplete2 = new google.maps.places.Autocomplete( input2, options );
 
     google.maps.event.addListener( autocomplete2, 'place_changed', function() {
       var place = autocomplete2.getPlace();
       parseAddress( [ place ] );
       // console.log( 'place', place );
-    } );
+    } );*/
 
     var onAddressSubmitted = function( address ) {
 

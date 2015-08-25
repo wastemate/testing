@@ -5,8 +5,8 @@ $(document).ready(function(){
   var jsKey = 'DEIXEICevT5qkR1zQxvj8PVHrvWu4XPKN2QUhhmL';
 
   wma_viewModel = new viewModel();
-  ko.applyBindings(wma_viewModel);
   wma_viewModel.show("loading");
+  ko.applyBindings(wma_viewModel);
   
   wastemate.initialize(appKey, jsKey)
     .then(function(categories){

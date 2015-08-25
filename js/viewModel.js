@@ -213,8 +213,7 @@ function viewModel() {
 	};
 
 	self.toggleBillingSame = function() {
-
-
+		
 		self._billingIsSame( !self._billingIsSame() );
 		console.log( 'billingIsSame', self._billingIsSame() );
 
@@ -683,7 +682,7 @@ function viewModel() {
 			self.show( 'residentialOrganics' );
 			console.log( 'show residentialOrganics' );
 		}
-
+		
 	};
 
 	self.selectResidentialDefaults = function(serviceObject, isLandfill){
@@ -701,7 +700,7 @@ function viewModel() {
 
 	self.next = function(data, event) {
 		switch(self.showing()){
-			case "residential":
+			case "residential": {
 				//store selection in a pending order
 				//save order should really return a promise... but this is a demo!
 				self.saveOrder(event, function( err ) {
@@ -729,54 +728,50 @@ function viewModel() {
 
 					} );
 
-        	$('#first-pickup-date-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
-        	$('#wma-rolloff-dropoff-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
-        	$('#wma-rolloff-pickup-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
-
-        	self.serviceStartDate( moment( self.serviceStartDate() || availableDates[0] ).toDate() );
-        	self.serviceEndDate( moment( self.serviceStartDate() || availableDates[0] ).toDate() );
-
-          var dp = $('#first-pickup-datepicker').datetimepicker({
-              icons: {
-                  date: "fa fa-calendar",
-                  up: "fa fa-arrow-up",
-                  down: "fa fa-arrow-down"
-              },
-          		format: 					'MM/dd/YY',
-          		minDate: 					moment(),
-              inline: 					true,
-					    disabledDates: 		invalidDates,
-              sideBySide: 			false,
-              defaultDate: 			self.serviceStartDate() || availableDates[0]
-          });
-
-          dp.on( 'dp.change', function( e ){
-          	var d = e.date;
-          	self.serviceStartDate( d.toDate() );
-          	$('#first-pickup-date-text').html( d.format('L') );
-          	console.log( 'changed', d );
-          } );
+					$('#first-pickup-date-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
+					$('#wma-rolloff-dropoff-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
+					$('#wma-rolloff-pickup-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
+		
+					self.serviceStartDate( moment( self.serviceStartDate() || availableDates[0] ).toDate() );
+					self.serviceEndDate( moment( self.serviceStartDate() || availableDates[0] ).toDate() );
+	
+					var dp = $('#first-pickup-datepicker').datetimepicker({
+						icons: {
+							date: "fa fa-calendar",
+							up: "fa fa-arrow-up",
+							down: "fa fa-arrow-down"
+						},
+							format: 					'MM/dd/YY',
+							minDate: 					moment(),
+						inline: 					true,
+									disabledDates: 		invalidDates,
+						sideBySide: 			false,
+						defaultDate: 			self.serviceStartDate() || availableDates[0]
+					});
+	
+					dp.on( 'dp.change', function( e ){
+						var d = e.date;
+						self.serviceStartDate( d.toDate() );
+						$('#first-pickup-date-text').html( d.format('L') );
+						console.log( 'changed', d );
+					} );
 
 					self.cartsChoosen(true);
 					self.show("chooseStart");
 
 				});
-
-
-
+			}
 			break;
-			case "materials":
-
+			case "materials": {
 				if ( !self.materialChoosen() ) {
 					alert( 'Please choose a material.' );
 					return;
 				}
 
 				self.show("rolloff");
-
-
+			}
 			break;
-			case "rolloff":
+			case "rolloff": {
 
 				console.log( self.selectedService() );
 
@@ -833,100 +828,94 @@ function viewModel() {
 				availableDates = dates.daysValid;
 				invalidDates = dates.daysInvalid;
 
+				$('#wma-rolloff-dropoff-date-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
+				$('#wma-rolloff-pickup-date-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
+		
+				self.serviceStartDate( moment( self.serviceStartDate() || availableDates[0] ).toDate() );
+				self.serviceEndDate( moment( self.serviceEndDate() || availableDates[0] ).toDate() );
+		
+				var defaultStart = moment( self.serviceStartDate() || availableDates[0] );
+		
+				var dp = $('#wma-rolloff-dropoff-datepicker').datetimepicker({
+					icons: {
+						date: "fa fa-calendar",
+						up: "fa fa-arrow-up",
+						down: "fa fa-arrow-down"
+					},
+						format: 					'MM/dd/YY',
+						minDate: 					defaultStart,
+						maxDate: 					availableDates[ availableDates.length - 1 ] ,
+					inline: 					true,
+							disabledDates: 		invalidDates,
+					sideBySide: 			false,
+					defaultDate: 			defaultStart
+				});
 
-      	$('#wma-rolloff-dropoff-date-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
-      	$('#wma-rolloff-pickup-date-text').html( moment( self.serviceStartDate() || availableDates[0] ).format('L') );
+				dp.on( 'dp.change', function( e ){
+					var d = e.date;
+					self.serviceStartDate( d.toDate() );
+					$('#wma-rolloff-dropoff-date-text').html( d.format('L') );
+					initPickup();        	
+					console.log( 'changed', d );
+				} );
+		
+				// ------------------
+		
+				var dp2;
 
-      	self.serviceStartDate( moment( self.serviceStartDate() || availableDates[0] ).toDate() );
-      	self.serviceEndDate( moment( self.serviceEndDate() || availableDates[0] ).toDate() );
+				var initPickup = function() {
+		
+					if ( dp2 ) {
+								$('#wma-rolloff-pickup-datepicker').data('DateTimePicker').destroy();
+					}
+		
+					var maxDaysRent = 7 * 4;
+		
+					var dates = getDates( moment( self.serviceStartDate() ).add( 1, 'days' ), maxDaysRent );
+							var availableDates = dates.daysValid;
+							var invalidDates = dates.daysInvalid;
+		
+					var minDate = availableDates[ 0 ];
+					var maxDate = availableDates[ availableDates.length-1 ];
+		
+					var defaultDate = minDate;
+		
+					dp2 = $('#wma-rolloff-pickup-datepicker').datetimepicker({
+						icons: {
+							date: "fa fa-calendar",
+							up: "fa fa-arrow-up",
+							down: "fa fa-arrow-down"
+						},
+							format: 					'MM/dd/YY',
+							minDate: 					minDate,
+							maxDate: 					maxDate ,
+						inline: 					true,
+								disabledDates: 		invalidDates,
+						sideBySide: 			false,
+						defaultDate: 			defaultDate
+					});
+		
+					dp2.on( 'dp.change', function( e ){
+						var d = e.date;
+						self.serviceEndDate( d.toDate() );
+						$('#wma-rolloff-pickup-date-text').html( d.format('L') );
+						console.log( 'changed', d );
+					} );
+		
+		
+				};
 
-      	var defaultStart = moment( self.serviceStartDate() || availableDates[0] );
-
-        var dp = $('#wma-rolloff-dropoff-datepicker').datetimepicker({
-            icons: {
-                date: "fa fa-calendar",
-                up: "fa fa-arrow-up",
-                down: "fa fa-arrow-down"
-            },
-        		format: 					'MM/dd/YY',
-        		minDate: 					defaultStart,
-        		maxDate: 					availableDates[ availableDates.length - 1 ] ,
-            inline: 					true,
-				    disabledDates: 		invalidDates,
-            sideBySide: 			false,
-            defaultDate: 			defaultStart
-        });
-
-        dp.on( 'dp.change', function( e ){
-        	var d = e.date;
-        	self.serviceStartDate( d.toDate() );
-        	$('#wma-rolloff-dropoff-date-text').html( d.format('L') );
-        	initPickup();        	
-        	console.log( 'changed', d );
-        } );
-
-        // ------------------
-
-        var dp2;
-
-        var initPickup = function() {
-
-        	if ( dp2 ) {
-						$('#wma-rolloff-pickup-datepicker').data('DateTimePicker').destroy();
-        	}
-
-        	var maxDaysRent = 7 * 4;
-
-        	var dates = getDates( moment( self.serviceStartDate() ).add( 1, 'days' ), maxDaysRent );
-					var availableDates = dates.daysValid;
-					var invalidDates = dates.daysInvalid;
-
-        	var minDate = availableDates[ 0 ];
-        	var maxDate = availableDates[ availableDates.length-1 ];
-
-	      	var defaultDate = minDate;
-
-	        dp2 = $('#wma-rolloff-pickup-datepicker').datetimepicker({
-	            icons: {
-	                date: "fa fa-calendar",
-	                up: "fa fa-arrow-up",
-	                down: "fa fa-arrow-down"
-	            },
-	        		format: 					'MM/dd/YY',
-	        		minDate: 					minDate,
-	        		maxDate: 					maxDate ,
-	            inline: 					true,
-					    disabledDates: 		invalidDates,
-	            sideBySide: 			false,
-	            defaultDate: 			defaultDate
-	        });
-
-	        dp2.on( 'dp.change', function( e ){
-	        	var d = e.date;
-	        	self.serviceEndDate( d.toDate() );
-	        	$('#wma-rolloff-pickup-date-text').html( d.format('L') );
-	        	console.log( 'changed', d );
-	        } );
-
-
-        };
-
-        // initPickup = _.debounce( initPickup, 200 );
-
-        initPickup();
-
+        		// initPickup = _.debounce( initPickup, 200 );
+        		initPickup();
 
 				self.saveOrder( event, function( err ) {
-
 					if ( err ) {
 						console.log( 'Could not save order.' )
 						return;
 					}
-
 					self.show("deliveryAndReview");
-
-				} );
-
+				});
+			}
 			break;
 			case "deliveryAndReview":
 
@@ -977,15 +966,15 @@ function viewModel() {
 
 				var siteInfo = {
 					firstName: self.serviceFirstName() || '',
-	        lastName: self.serviceLastName() || '',
-	        email: self.serviceEmail() || '',
-	        phone: self.servicePhone() || '',
-	        address: self.serviceAddressFull() || '',
-	        street: self.serviceAddress() || '',
-	        city: self.serviceCity() || '',
-	        state: self.serviceStateShort() || '',
-	        suite: self.serviceAddressApt() || '',
-	        zip: self.serviceZip() || ''
+					lastName: self.serviceLastName() || '',
+					email: self.serviceEmail() || '',
+					phone: self.servicePhone() || '',
+					address: self.serviceAddressFull() || '',
+					street: self.serviceAddress() || '',
+					city: self.serviceCity() || '',
+					state: self.serviceStateShort() || '',
+					suite: self.serviceAddressApt() || '',
+					zip: self.serviceZip() || ''
 				};
 
 				if ( siteInfo.firstName == '' ) {
@@ -1053,34 +1042,34 @@ function viewModel() {
 					return;
 				}
 
-		    if ( !self.validBillingCard() ) {
-		    	alert( 'Ooops. Please enter a valid card number.' );
-		    	return;
-		    } else if ( !self.validBillingCardExpiration() ) {
-		    	alert( 'Ooops. Please enter a valid expiration date.' )
-		    	return;
-		    } else if ( !self.validBillingCardSecurity() ) {
-		    	alert( 'Ooops. Please enter a valid security code' );
-		    	return;
-		    } else if ( !self.billingFirstName() || self.billingFirstName() == '' ) {
-		    	alert( 'Oops. Missing first name.' );
-		    	return;
-		    } else if ( !self.billingLastName() || self.billingLastName() == '' ) {
-		    	alert( 'Ooops. Missing last name.' );
-		    	return;
-		    } else if ( !self.billingAddress() || self.billingAddress() == '' ) {
-		    	alert( 'Ooops. Missing billing address.' )
-		    	return;
-		    } else if ( !self.billingStateShort || self.billingStateShort() == '' ) {
-		    	alert( 'Ooops, Missing billing state.' );
-		    	return;
-		    } else if ( !self.billingCity || self.billingCity() == '' ) {
-		    	alert( 'Ooops, Missing billing city.' );
-		    	return;
-		    } else if ( !self.billingZip() || self.billingZip() == '' ) {
-		    	alert( 'Ooops. Missing ZIP.' );
-		    	return;
-		    }
+				if ( !self.validBillingCard() ) {
+					alert( 'Ooops. Please enter a valid card number.' );
+					return;
+				} else if ( !self.validBillingCardExpiration() ) {
+					alert( 'Ooops. Please enter a valid expiration date.' )
+					return;
+				} else if ( !self.validBillingCardSecurity() ) {
+					alert( 'Ooops. Please enter a valid security code' );
+					return;
+				} else if ( !self.billingFirstName() || self.billingFirstName() == '' ) {
+					alert( 'Oops. Missing first name.' );
+					return;
+				} else if ( !self.billingLastName() || self.billingLastName() == '' ) {
+					alert( 'Ooops. Missing last name.' );
+					return;
+				} else if ( !self.billingAddress() || self.billingAddress() == '' ) {
+					alert( 'Ooops. Missing billing address.' )
+					return;
+				} else if ( !self.billingStateShort || self.billingStateShort() == '' ) {
+					alert( 'Ooops, Missing billing state.' );
+					return;
+				} else if ( !self.billingCity || self.billingCity() == '' ) {
+					alert( 'Ooops, Missing billing city.' );
+					return;
+				} else if ( !self.billingZip() || self.billingZip() == '' ) {
+					alert( 'Ooops. Missing ZIP.' );
+					return;
+				}
 
 				self.saveOrderInFlight = true;
 
