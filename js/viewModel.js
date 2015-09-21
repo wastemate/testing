@@ -106,6 +106,7 @@ Date.prototype.toJSONLocal = function () {
 function viewModel() {
   var self = this;
   self.showing = ko.observable('search');
+  self.shouldShowWMA = ko.observable(false);
   /* visibility controls */
   self.shouldShowSearch = ko.observable(false);
   self.shouldShowCategories = ko.observable(false);
@@ -262,27 +263,32 @@ function viewModel() {
     if (!_.isNumber(self.serviceDay())) {
       return;
     }
+    
     var getNextServiceDate = function (weeksOffset) {
       // 0 is next soonest service date, 1 is a week after that...
       // assumed to be a weekday
       var serviceDayOfWeek = self.serviceDay();
       var daysOffset = weeksOffset * 7;
-      var d = moment().day(0).add(daysOffset + 7 + serviceDayOfWeek, 'days').toDate();
+      var d = moment().day(0).add(daysOffset + serviceDayOfWeek, 'days').toDate();
       var weekDate = {
         date: d,
         isoString: d.toJSONLocal()
       };
       return weekDate;
     };
-    var numItemsReturned = 50;
+    var soonest = moment().add(24, 'hours');
+    var numItemsReturned = 6; //Order up to 6 weeks in advance
     var deliveryDays = [];
     var buildArray = function () {
       var weekDate = getNextServiceDate(deliveryDays.length);
       // filter out holidays
-      h = DateHelper.getHoliday(weekDate.date);
+      var h = DateHelper.getHoliday(weekDate.date);
       if (h) {
         weekDate = null;
+      } else if (soonest.isAfter(weekDate.date)){
+        weekDate = null;
       }
+      
       deliveryDays.push(weekDate);
       deliveryDays.length < numItemsReturned ? buildArray() : console.log('built list');
     };
@@ -924,32 +930,42 @@ function viewModel() {
         address: self.billingAddress(),
         zipCode: self.billingZip()
       };
+            
       wastemate.tokenizeCard(cardInfo).then(function (cardToken) {
+        cardToken.cardType = $.payment.cardType(cardInfo.cardNumber);
         wastemate._private.order.cardToken = cardToken;
-        //Step 2 - Persist billing info via fire and forget
-        wastemate._private.order.save();
-        //TODO: store the billing information!
-        /*wastemate.saveBillingSelection({
-								name: self.billingFirstName() + '' + self.billingLastName()
-							}).then(function(){
-
-							}, function(err){
-
-							});*/
-        //Step 3 - Process the order!
-        wastemate.processNewOrder().then(function (account) {
-          self.saveOrderInFlight = false;
-          console.log(account);
-          self.paymentProcessed(true);
-          self.accountNumber(account.C_ID);
-          self.show('confirmation');
-        }, function (err) {
+        
+        //Preauthorize the payment
+        var amount = self.selectedServicePrice();
+        if (!self.wantsAutopay()) {
+            amount = amount * 2;
+        }
+        amount = ~~(parseFloat(amount) * 100);
+        wastemate.preAuthorizePayment(amount, cardInfo).then(function(preauth){
+          wastemate._private.order.set('delayedCaptureToken', preauth.creditCardToken); 
+          //Step 2 - Persist billing info via fire and forget
+          wastemate._private.order.save();
+          wastemate.setBillingOptions(self.wantsAutopay(), self.wantsPaperless());
+          wastemate.processNewOrder().then(function (account) {
+            self.saveOrderInFlight = false;
+            console.log(account);
+            self.paymentProcessed(true);
+            self.accountNumber(account.C_ID);
+            self.show('confirmation');
+          }, function (err) {
+            self.saveOrderInFlight = false;
+            console.log(err);
+            if (err) {
+              alert('Oops. There was a problem processing your order.');
+            }
+          });
+        }, function(err){
           self.saveOrderInFlight = false;
           console.log(err);
-          if (err) {
-            alert('Oops. There was a problem processing your order.');
-          }
-        });
+           if (err) {
+              alert('Upfront payment failed.');
+            }
+        });       
       }, function (err) {
         self.saveOrderInFlight = false;
         console.log(err);
@@ -1051,6 +1067,12 @@ function viewModel() {
       break;
     case 'categries':
       hideAll();
+      //bring wastemate front and center when embedded in a 3rd party site
+      var siteContent = $('#body');
+      if(siteContent){
+        self.shouldShowWMA(true);
+        siteContent.hide();
+      }
       self.shouldShowCategories(true);
       break;
     case 'residential':
@@ -1146,7 +1168,21 @@ ko.bindingHandlers.backgroundImage = {
     });
   }
 };
-// --------------------------------------
+ko.bindingHandlers.mapAddress = {
+  update: function (element, valueAccessor) {
+    ko.bindingHandlers.html.update(element, function () {
+      var value =  ko.unwrap(valueAccessor());
+      if(value){
+        return '<i class="fa fa-map-marker"></i> ' + value;  
+      } else {
+        return '&nbsp;';
+      }
+    });
+  }
+};
+
+function bindViewFormatters(){
+  // --------------------------------------
 // --------------------------------------
 // validate cc num
 $('#wma-cst-crdnbr').payment('formatCardNumber');
@@ -1235,3 +1271,4 @@ $('.wma-billing-input').on('keyup', function () {
 $(function () {
   $('[data-toggle="tooltip"]').tooltip();
 });
+}

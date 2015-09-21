@@ -5,24 +5,30 @@ var setupLiveAddressGoogle = function (viewModel) {
     types: ['address'],
     componentRestrictions: { country: 'us' }
   };
-  // first input
+  // first (header) input
   var input = document.getElementById('street_address');
   var autocomplete = new google.maps.places.Autocomplete(input, options);
   google.maps.event.addListener(autocomplete, 'place_changed', function () {
     var place = autocomplete.getPlace();
     parseAddress([place], function () {
       viewModel.show('categries');
-    });  // console.log( 'place', place );
+    });
   });
-  // second (lob) input
-  /*var input2 = document.getElementById( 'lob_address' );
+  
+  // second (lightbox) input
+  var input2 = document.getElementById('floating_address' );
+  if(input2){
     var autocomplete2 = new google.maps.places.Autocomplete( input2, options );
 
     google.maps.event.addListener( autocomplete2, 'place_changed', function() {
       var place = autocomplete2.getPlace();
-      parseAddress( [ place ] );
-      // console.log( 'place', place );
-    } );*/
+      parseAddress( [ place ], function () {
+        $('#signUp').modal('hide');
+        viewModel.show('categries');
+      });
+    });
+  }
+  
   var onAddressSubmitted = function (address) {
     var geo = new google.maps.Geocoder();
     geo.geocode({ address: address }, function (results, status) {
